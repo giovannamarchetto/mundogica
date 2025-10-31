@@ -1,47 +1,49 @@
 <?php
 include 'conexao.php';
 
+// Verificar se tem ID do produto
 if(!isset($_GET['id'])) {
     header('Location: index.php');
     exit;
 }
 
-$produto_id = intval($_GET['id']);
-$stmt = $conn->prepare("SELECT * FROM produtos WHERE id = ?");
-$stmt->bind_param("i", $produto_id);
-$stmt->execute();
-$result = $stmt->get_result();
+// Buscar produto
+$produto_id = $_GET['id'];
+$sql = "SELECT * FROM produtos WHERE id = $produto_id";
+$resultado = mysqli_query($conn, $sql);
 
-if($result->num_rows == 0) {
+// Se não encontrou, voltar para index
+if(mysqli_num_rows($resultado) == 0) {
     header('Location: index.php');
     exit;
 }
 
-$produto = $result->fetch_assoc();
+$produto = mysqli_fetch_assoc($resultado);
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $produto['nome']; ?> - Mundo GiCa</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .produto-detalhes {
             max-width: 1200px;
             margin: 100px auto 50px;
-            padding: 0 20px;
+            padding: 20px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
-            align-items: start;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         
         .produto-imagem img {
             width: 100%;
+            max-width: 500px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
         
         .produto-info h1 {
@@ -71,6 +73,13 @@ $produto = $result->fetch_assoc();
             font-size: 1.1rem;
         }
         
+        .estoque-info {
+            color: #059669;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
         .add-carrinho-form {
             display: flex;
             gap: 15px;
@@ -84,6 +93,7 @@ $produto = $result->fetch_assoc();
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             text-align: center;
+            font-size: 1rem;
         }
         
         .btn-adicionar {
@@ -94,17 +104,11 @@ $produto = $result->fetch_assoc();
             border-radius: 8px;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-weight: 600;
         }
         
         .btn-adicionar:hover {
             background-color: #6d28d9;
-        }
-        
-        .estoque-info {
-            color: #059669;
-            font-weight: 600;
-            margin-bottom: 20px;
         }
         
         .voltar-link {
@@ -113,12 +117,12 @@ $produto = $result->fetch_assoc();
             color: #7c3aed;
             text-decoration: none;
             font-weight: 600;
+            font-size: 1.1rem;
         }
         
         @media (max-width: 768px) {
             .produto-detalhes {
                 grid-template-columns: 1fr;
-                gap: 20px;
             }
         }
     </style>
@@ -139,27 +143,28 @@ $produto = $result->fetch_assoc();
             <div class="estoque-info">
                 <?php 
                 if($produto['estoque'] > 10) {
-                    echo "Em estoque";
+                    echo "✓ Em estoque";
                 } elseif($produto['estoque'] > 0) {
-                    echo "Últimas unidades!";
+                    echo "⚠ Últimas " . $produto['estoque'] . " unidades!";
                 } else {
-                    echo "Produto esgotado";
+                    echo "✗ Produto esgotado";
                 }
                 ?>
             </div>
             
             <div class="produto-descricao">
-                <?php echo nl2br(htmlspecialchars($produto['descricao'])); ?>
+                <?php echo nl2br($produto['descricao']); ?>
             </div>
             
             <?php if($produto['estoque'] > 0): ?>
-            <form method="POST" action="adicionar_carrinho.php" class="add-carrinho-form">
-                <input type="hidden" name="produto_id" value="<?php echo $produto['id']; ?>">
-                <input type="number" name="quantidade" value="1" min="1" max="<?php echo $produto['estoque']; ?>" class="quantidade-input">
-                <button type="submit" class="btn-adicionar">Adicionar ao Carrinho</button>
-            </form>
+                <form method="POST" action="adicionar_carrinho.php" class="add-carrinho-form">
+                    <input type="hidden" name="produto_id" value="<?php echo $produto['id']; ?>">
+                    <label for="quantidade" style="font-weight: 600;">Quantidade:</label>
+                    <input type="number" id="quantidade" name="quantidade" value="1" min="1" max="<?php echo $produto['estoque']; ?>" class="quantidade-input">
+                    <button type="submit" class="btn-adicionar">🛒 Adicionar ao Carrinho</button>
+                </form>
             <?php else: ?>
-                <button class="btn-adicionar" disabled>Produto Esgotado</button>
+                <button class="btn-adicionar" disabled style="opacity: 0.5; cursor: not-allowed;">Produto Esgotado</button>
             <?php endif; ?>
             
             <a href="index.php" class="voltar-link">← Voltar para a loja</a>

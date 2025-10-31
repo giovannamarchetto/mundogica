@@ -31,7 +31,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Editar produto existente
         $id = intval($_POST['id']);
         $stmt = $conn->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco = ?, marca = ?, estoque = ?, imagem = ? WHERE id = ?");
-        $stmt->bind_param("ssdsisi", $nome, $descricao, $preco, $marca, $estoque, $imagem, $id);
+        $stmt->bind_param("ssdsis", $nome, $descricao, $preco, $marca, $estoque, $imagem, $id);
         
         if($stmt->execute()) {
             $_SESSION['sucesso'] = "Produto atualizado com sucesso!";
@@ -41,7 +41,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         // Inserir novo produto
         $stmt = $conn->prepare("INSERT INTO produtos (nome, descricao, preco, marca, estoque, imagem) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssdsis", $nome, $descricao, $preco, $marca, $estoque, $imagem);
+        $stmt->bind_param("ssds is", $nome, $descricao, $preco, $marca, $estoque, $imagem);
         
         if($stmt->execute()) {
             $_SESSION['sucesso'] = "Produto cadastrado com sucesso!";

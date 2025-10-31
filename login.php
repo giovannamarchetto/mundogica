@@ -1,7 +1,7 @@
 <?php
 include 'conexao.php';
 
-// Redirecionar se já estiver logado
+// Se já está logado, redirecionar para index
 if(isset($_SESSION['cliente_id'])) {
     header('Location: index.php');
     exit;
@@ -9,32 +9,41 @@ if(isset($_SESSION['cliente_id'])) {
 
 $erro = '';
 
+// Verificar se o formulário foi enviado
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = trim($_POST['email']);
+    // Pegar dados do formulário
+    $email = $_POST['email'];
     $senha = $_POST['senha'];
     
+    // Validar se campos estão vazios
     if(empty($email) || empty($senha)) {
         $erro = "Preencha todos os campos!";
-    } else {
-        $stmt = $conn->prepare("SELECT id, nome, email, senha FROM clientes WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+    }
+    else {
+        // Buscar cliente no banco
+        $sql = "SELECT * FROM clientes WHERE email = '$email'";
+        $resultado = mysqli_query($conn, $sql);
         
-        if($result->num_rows == 1) {
-            $cliente = $result->fetch_assoc();
+        // Verificar se encontrou o cliente
+        if(mysqli_num_rows($resultado) == 1) {
+            $cliente = mysqli_fetch_assoc($resultado);
             
+            // Verificar se a senha está correta
             if(password_verify($senha, $cliente['senha'])) {
+                // Login com sucesso!
                 $_SESSION['cliente_id'] = $cliente['id'];
                 $_SESSION['cliente_nome'] = $cliente['nome'];
                 $_SESSION['cliente_email'] = $cliente['email'];
                 
+                // Redirecionar para index
                 header('Location: index.php');
                 exit;
-            } else {
+            }
+            else {
                 $erro = "Senha incorreta!";
             }
-        } else {
+        }
+        else {
             $erro = "E-mail não encontrado!";
         }
     }
@@ -45,7 +54,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Mundo GiCa</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -72,7 +80,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: block;
             margin-bottom: 5px;
             font-weight: 600;
-            color: #334155;
         }
         
         .form-group input {
@@ -81,12 +88,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus {
-            outline: none;
-            border-color: #7c3aed;
+            box-sizing: border-box;
         }
         
         .btn-login {
@@ -98,11 +100,20 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 8px;
             font-size: 1.1rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-weight: 600;
         }
         
         .btn-login:hover {
             background-color: #6d28d9;
+        }
+        
+        .alert {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #fecaca;
         }
         
         .cadastro-link {
@@ -110,19 +121,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-top: 20px;
         }
         
-        .alert {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            background-color: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
+        .cadastro-link a {
+            color: #7c3aed;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <?php include 'header.php'; ?>
-    
     <div class="login-container">
         <h2>Login</h2>
         
@@ -132,13 +137,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         <form method="POST" action="">
             <div class="form-group">
-                <label for="email">E-mail</label>
-                <input type="email" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
+                <label>E-mail</label>
+                <input type="email" name="email" required>
             </div>
             
             <div class="form-group">
-                <label for="senha">Senha</label>
-                <input type="password" id="senha" name="senha" required>
+                <label>Senha</label>
+                <input type="password" name="senha" required>
             </div>
             
             <button type="submit" class="btn-login">Entrar</button>

@@ -15,11 +15,13 @@ $result = $stmt->get_result();
 $usuario = $result->fetch_assoc();
 
 if(!$usuario || $usuario['admin'] != 1) {
+    $_SESSION['erro'] = "Você não tem permissão para acessar esta área!";
     header('Location: index.php');
     exit;
 }
 
 // Processar edição de produto
+$produto_editar = null;
 if(isset($_GET['editar'])) {
     $produto_id = intval($_GET['editar']);
     $stmt = $conn->prepare("SELECT * FROM produtos WHERE id = ?");
@@ -184,6 +186,7 @@ while($row = $result->fetch_assoc()) {
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s;
+            box-sizing: border-box;
         }
         
         .form-group input:focus,
@@ -216,25 +219,17 @@ while($row = $result->fetch_assoc()) {
     <?php include 'header.php'; ?>
     
     <div class="admin-container">
-        <h1>Painel Administrativo</h1>
-        
-        <?php if(isset($_SESSION['sucesso'])): ?>
-            <div class="alert alert-success"><?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?></div>
-        <?php endif; ?>
-        
-        <?php if(isset($_SESSION['erro'])): ?>
-            <div class="alert alert-error"><?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?></div>
-        <?php endif; ?>
+        <h1>🛠 Painel Administrativo</h1>
         
         <div class="admin-tabs">
-            <button class="admin-tab active" onclick="openTab('produtos')">Produtos</button>
-            <button class="admin-tab" onclick="openTab('pedidos')">Pedidos</button>
-            <button class="admin-tab" onclick="openTab('adicionar')"><?php echo isset($produto_editar) ? 'Editar Produto' : 'Adicionar Produto'; ?></button>
+            <button class="admin-tab active" onclick="openTab(event, 'produtos')">Produtos</button>
+            <button class="admin-tab" onclick="openTab(event, 'pedidos')">Pedidos</button>
+            <button class="admin-tab" onclick="openTab(event, 'adicionar')"><?php echo isset($produto_editar) ? 'Editar Produto' : 'Adicionar Produto'; ?></button>
         </div>
         
         <!-- Tab Produtos -->
         <div id="produtos" class="tab-content active">
-            <button class="btn-admin btn-add" onclick="openTab('adicionar')">+ Adicionar Novo Produto</button>
+            <button class="btn-admin btn-add" onclick="openTab(event, 'adicionar')">+ Adicionar Novo Produto</button>
             
             <table class="admin-table">
                 <thead>
@@ -253,10 +248,10 @@ while($row = $result->fetch_assoc()) {
                     <tr>
                         <td><?php echo $produto['id']; ?></td>
                         <td>
-                            <img src="<?php echo $produto['imagem']; ?>" alt="<?php echo $produto['nome']; ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                            <img src="<?php echo $produto['imagem']; ?>" alt="<?php echo htmlspecialchars($produto['nome']); ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
                         </td>
-                        <td><?php echo $produto['nome']; ?></td>
-                        <td><?php echo $produto['marca']; ?></td>
+                        <td><?php echo htmlspecialchars($produto['nome']); ?></td>
+                        <td><?php echo htmlspecialchars($produto['marca']); ?></td>
                         <td>R$ <?php echo number_format($produto['preco'], 2, ',', '.'); ?></td>
                         <td><?php echo $produto['estoque']; ?></td>
                         <td>
@@ -286,7 +281,7 @@ while($row = $result->fetch_assoc()) {
                     <?php foreach($pedidos as $pedido): ?>
                     <tr>
                         <td>#<?php echo $pedido['id']; ?></td>
-                        <td><?php echo $pedido['cliente_nome']; ?></td>
+                        <td><?php echo htmlspecialchars($pedido['cliente_nome']); ?></td>
                         <td>R$ <?php echo number_format($pedido['total'], 2, ',', '.'); ?></td>
                         <td>
                             <span class="status-<?php echo $pedido['status']; ?>">
@@ -318,12 +313,12 @@ while($row = $result->fetch_assoc()) {
                 
                 <div class="form-group">
                     <label for="nome">Nome do Produto</label>
-                    <input type="text" id="nome" name="nome" value="<?php echo isset($produto_editar) ? $produto_editar['nome'] : ''; ?>" required>
+                    <input type="text" id="nome" name="nome" value="<?php echo isset($produto_editar) ? htmlspecialchars($produto_editar['nome']) : ''; ?>" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="descricao">Descrição</label>
-                    <textarea id="descricao" name="descricao" rows="4" required><?php echo isset($produto_editar) ? $produto_editar['descricao'] : ''; ?></textarea>
+                    <textarea id="descricao" name="descricao" rows="4" required><?php echo isset($produto_editar) ? htmlspecialchars($produto_editar['descricao']) : ''; ?></textarea>
                 </div>
                 
                 <div class="form-group">
@@ -333,7 +328,7 @@ while($row = $result->fetch_assoc()) {
                 
                 <div class="form-group">
                     <label for="marca">Marca</label>
-                    <input type="text" id="marca" name="marca" value="<?php echo isset($produto_editar) ? $produto_editar['marca'] : ''; ?>" required>
+                    <input type="text" id="marca" name="marca" value="<?php echo isset($produto_editar) ? htmlspecialchars($produto_editar['marca']) : ''; ?>" required>
                 </div>
                 
                 <div class="form-group">
@@ -343,7 +338,7 @@ while($row = $result->fetch_assoc()) {
                 
                 <div class="form-group">
                     <label for="imagem">URL da Imagem</label>
-                    <input type="text" id="imagem" name="imagem" value="<?php echo isset($produto_editar) ? $produto_editar['imagem'] : ''; ?>" required placeholder="Ex: img/produto.jpg">
+                    <input type="text" id="imagem" name="imagem" value="<?php echo isset($produto_editar) ? htmlspecialchars($produto_editar['imagem']) : ''; ?>" required placeholder="Ex: img/produto.jpg">
                 </div>
                 
                 <button type="submit" class="btn-admin btn-save"><?php echo isset($produto_editar) ? 'Atualizar Produto' : 'Salvar Produto'; ?></button>
@@ -352,20 +347,22 @@ while($row = $result->fetch_assoc()) {
     </div>
 
     <script>
-        function openTab(tabName) {
+        function openTab(evt, tabName) {
             // Esconder todas as tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
+            var tabcontent = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove('active');
+            }
             
             // Remover active de todos os botões
-            document.querySelectorAll('.admin-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
+            var tablinks = document.getElementsByClassName("admin-tab");
+            for (var i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove('active');
+            }
             
             // Mostrar tab selecionada
             document.getElementById(tabName).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if(evt) evt.currentTarget.classList.add('active');
         }
         
         function atualizarStatus(pedidoId, status) {
@@ -376,8 +373,12 @@ while($row = $result->fetch_assoc()) {
         
         // Abrir tab de edição se estiver editando
         <?php if(isset($produto_editar)): ?>
-            document.addEventListener('DOMContentLoaded', function() {
-                openTab('adicionar');
+            window.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('adicionar').classList.add('active');
+                document.getElementById('produtos').classList.remove('active');
+                var tabs = document.getElementsByClassName('admin-tab');
+                tabs[0].classList.remove('active');
+                tabs[2].classList.add('active');
             });
         <?php endif; ?>
     </script>

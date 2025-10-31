@@ -4,6 +4,9 @@ include 'conexao.php';
 $erro = '';
 $sucesso = '';
 
+// Pré-preencher email se vier da newsletter
+$email_preenchido = isset($_GET['email']) ? htmlspecialchars($_GET['email']) : '';
+
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nome = trim($_POST['nome']);
     $email = trim($_POST['email']);
@@ -36,7 +39,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bind_param("ssss", $nome, $email, $senha_hash, $telefone);
             
             if($stmt->execute()) {
-                $sucesso = "Cadastro realizado com sucesso! <a href='login.php'>Faça login aqui</a>";
+                $sucesso = "Cadastro realizado com sucesso! <a href='login.php' style='color: #065f46; font-weight: bold;'>Faça login aqui</a>";
             } else {
                 $erro = "Erro ao cadastrar. Tente novamente.";
             }
@@ -86,6 +89,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s;
+            box-sizing: border-box;
         }
         
         .form-group input:focus {
@@ -112,6 +116,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         .login-link {
             text-align: center;
             margin-top: 20px;
+        }
+        
+        .login-link a {
+            color: #7c3aed;
+            text-decoration: none;
+            font-weight: 600;
         }
         
         .alert {
@@ -155,22 +165,22 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             <div class="form-group">
                 <label for="email">E-mail *</label>
-                <input type="email" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
+                <input type="email" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : $email_preenchido; ?>" required>
             </div>
             
             <div class="form-group">
                 <label for="telefone">Telefone</label>
-                <input type="tel" id="telefone" name="telefone" value="<?php echo isset($_POST['telefone']) ? htmlspecialchars($_POST['telefone']) : ''; ?>">
+                <input type="tel" id="telefone" name="telefone" value="<?php echo isset($_POST['telefone']) ? htmlspecialchars($_POST['telefone']) : ''; ?>" placeholder="(16) 99999-9999">
             </div>
             
             <div class="form-group">
-                <label for="senha">Senha *</label>
-                <input type="password" id="senha" name="senha" required>
+                <label for="senha">Senha * (mínimo 6 caracteres)</label>
+                <input type="password" id="senha" name="senha" required minlength="6">
             </div>
             
             <div class="form-group">
                 <label for="confirmar_senha">Confirmar Senha *</label>
-                <input type="password" id="confirmar_senha" name="confirmar_senha" required>
+                <input type="password" id="confirmar_senha" name="confirmar_senha" required minlength="6">
             </div>
             
             <button type="submit" class="btn-cadastrar">Cadastrar</button>

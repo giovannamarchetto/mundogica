@@ -3,48 +3,60 @@ include 'conexao.php';
 
 // Redirecionar se não estiver logado
 if(!isset($_SESSION['cliente_id'])) {
+    $_SESSION['erro'] = "Você precisa fazer login para finalizar o pedido!";
     header('Location: login.php');
     exit;
 }
 
 // Redirecionar se carrinho estiver vazio
 if(empty($_SESSION['carrinho'])) {
+    $_SESSION['erro'] = "Seu carrinho está vazio!";
     header('Location: carrinho.php');
     exit;
 }
 
 // Processar finalização do pedido
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Calcular total
-    $total = 0;
-    foreach($_SESSION['carrinho'] as $item) {
-        $total += $item['preco'] * $item['quantidade'];
-    }
+    $endereco = trim($_POST['endereco']);
+    $cep = trim($_POST['cep']);
+    $forma_pagamento = trim($_POST['forma_pagamento']);
+    $observacoes = trim($_POST['observacoes']);
     
-    // Inserir pedido
-    $stmt = $conn->prepare("INSERT INTO pedidos (cliente_id, total, status) VALUES (?, ?, 'pendente')");
-    $stmt->bind_param("id", $_SESSION['cliente_id'], $total);
-    $stmt->execute();
-    $pedido_id = $stmt->insert_id;
-    
-    // Inserir itens do pedido e atualizar estoque
-    foreach($_SESSION['carrinho'] as $item) {
-        $stmt = $conn->prepare("INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiid", $pedido_id, $item['produto_id'], $item['quantidade'], $item['preco']);
-        $stmt->execute();
+    // Validações
+    if(empty($endereco) || empty($cep) || empty($forma_pagamento)) {
+        $_SESSION['erro'] = "Preencha todos os campos obrigatórios!";
+    } else {
+        // Calcular total
+        $total = 0;
+        foreach($_SESSION['carrinho'] as $item) {
+            $total += $item['preco'] * $item['quantidade'];
+        }
         
-        // Atualizar estoque
-        $stmt = $conn->prepare("UPDATE produtos SET estoque = estoque - ? WHERE id = ?");
-        $stmt->bind_param("ii", $item['quantidade'], $item['produto_id']);
+        // Inserir pedido
+        $stmt = $conn->prepare("INSERT INTO pedidos (cliente_id, total, status, endereco, cep, forma_pagamento, observacoes) VALUES (?, ?, 'pendente', ?, ?, ?, ?)");
+        $stmt->bind_param("idssss", $_SESSION['cliente_id'], $total, $endereco, $cep, $forma_pagamento, $observacoes);
         $stmt->execute();
+        $pedido_id = $stmt->insert_id;
+        
+        // Inserir itens do pedido e atualizar estoque
+        foreach($_SESSION['carrinho'] as $item) {
+            $stmt = $conn->prepare("INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("iiid", $pedido_id, $item['produto_id'], $item['quantidade'], $item['preco']);
+            $stmt->execute();
+            
+            // Atualizar estoque
+            $stmt = $conn->prepare("UPDATE produtos SET estoque = estoque - ? WHERE id = ?");
+            $stmt->bind_param("ii", $item['quantidade'], $item['produto_id']);
+            $stmt->execute();
+        }
+        
+        // Limpar carrinho
+        unset($_SESSION['carrinho']);
+        
+        $_SESSION['pedido_sucesso'] = "Pedido #$pedido_id realizado com sucesso! Em breve entraremos em contato para confirmar o pagamento e o envio.";
+        header('Location: index.php');
+        exit;
     }
-    
-    // Limpar carrinho
-    unset($_SESSION['carrinho']);
-    
-    $_SESSION['pedido_sucesso'] = "Pedido #$pedido_id realizado com sucesso!";
-    header('Location: index.php');
-    exit;
 }
 
 // Calcular total para exibição
@@ -81,6 +93,12 @@ foreach($_SESSION['carrinho'] as $item) {
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             padding: 30px;
             margin-bottom: 30px;
+        }
+        
+        .resumo-pedido h2 {
+            color: #334155;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
         }
         
         .resumo-item {
@@ -125,6 +143,12 @@ foreach($_SESSION['carrinho'] as $item) {
             padding: 30px;
         }
         
+        .form-finalizar h2 {
+            color: #334155;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
         .form-group {
             margin-bottom: 20px;
         }
@@ -145,6 +169,7 @@ foreach($_SESSION['carrinho'] as $item) {
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s;
+            box-sizing: border-box;
         }
         
         .form-group input:focus,
@@ -157,17 +182,27 @@ foreach($_SESSION['carrinho'] as $item) {
         .btn-finalizar {
             width: 100%;
             padding: 15px;
-            background-color: #7c3aed;
+            background-color: #10b981;
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         
         .btn-finalizar:hover {
-            background-color: #6d28d9;
+            background-color: #059669;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
         }
     </style>
 </head>
@@ -177,16 +212,20 @@ foreach($_SESSION['carrinho'] as $item) {
     <div class="finalizar-container">
         <h1 class="finalizar-titulo">Finalizar Pedido</h1>
         
+        <?php if(isset($_SESSION['erro'])): ?>
+            <div class="alert"><?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?></div>
+        <?php endif; ?>
+        
         <div class="resumo-pedido">
             <h2>Resumo do Pedido</h2>
             <?php foreach($_SESSION['carrinho'] as $item): ?>
                 <div class="resumo-item">
                     <div class="item-info">
                         <div class="item-imagem">
-                            <img src="<?php echo $item['imagem']; ?>" alt="<?php echo $item['nome']; ?>">
+                            <img src="<?php echo $item['imagem']; ?>" alt="<?php echo htmlspecialchars($item['nome']); ?>">
                         </div>
                         <div>
-                            <h3><?php echo $item['nome']; ?></h3>
+                            <h3><?php echo htmlspecialchars($item['nome']); ?></h3>
                             <p>Quantidade: <?php echo $item['quantidade']; ?></p>
                         </div>
                     </div>
@@ -205,17 +244,17 @@ foreach($_SESSION['carrinho'] as $item) {
             <h2>Informações de Entrega</h2>
             
             <div class="form-group">
-                <label for="endereco">Endereço de Entrega</label>
-                <textarea id="endereco" name="endereco" rows="3" required placeholder="Rua, número, bairro, cidade..."></textarea>
+                <label for="endereco">Endereço de Entrega *</label>
+                <textarea id="endereco" name="endereco" rows="3" required placeholder="Rua, número, complemento, bairro, cidade - UF"></textarea>
             </div>
             
             <div class="form-group">
-                <label for="cep">CEP</label>
-                <input type="text" id="cep" name="cep" required>
+                <label for="cep">CEP *</label>
+                <input type="text" id="cep" name="cep" required placeholder="00000-000" maxlength="9">
             </div>
             
             <div class="form-group">
-                <label for="forma_pagamento">Forma de Pagamento</label>
+                <label for="forma_pagamento">Forma de Pagamento *</label>
                 <select id="forma_pagamento" name="forma_pagamento" required>
                     <option value="">Selecione...</option>
                     <option value="cartao">Cartão de Crédito</option>
@@ -225,7 +264,7 @@ foreach($_SESSION['carrinho'] as $item) {
             </div>
             
             <div class="form-group">
-                <label for="observacoes">Observações</label>
+                <label for="observacoes">Observações (opcional)</label>
                 <textarea id="observacoes" name="observacoes" rows="2" placeholder="Alguma observação sobre o pedido..."></textarea>
             </div>
             
