@@ -33,28 +33,32 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         // Inserir pedido
-        $stmt = $conn->prepare("INSERT INTO pedidos (cliente_id, total, status, endereco, cep, forma_pagamento, observacoes) VALUES (?, ?, 'pendente', ?, ?, ?, ?)");
-        $stmt->bind_param("idssss", $_SESSION['cliente_id'], $total, $endereco, $cep, $forma_pagamento, $observacoes);
-        $stmt->execute();
-        $pedido_id = $stmt->insert_id;
+        $sql = "INSERT INTO pedidos (cliente_id, total, status, endereco, cep, forma_pagamento, observacoes) 
+                VALUES ({$_SESSION['cliente_id']}, $total, 'pendente', '$endereco', '$cep', '$forma_pagamento', '$observacoes')";
+        mysqli_query($conn, $sql);
+        $pedido_id = mysqli_insert_id($conn);
         
         // Inserir itens do pedido e atualizar estoque
         foreach($_SESSION['carrinho'] as $item) {
-            $stmt = $conn->prepare("INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("iiid", $pedido_id, $item['produto_id'], $item['quantidade'], $item['preco']);
-            $stmt->execute();
+            $produto_id = $item['produto_id'];
+            $quantidade = $item['quantidade'];
+            $preco = $item['preco'];
+            
+            // Inserir item
+            $sql = "INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco) 
+                    VALUES ($pedido_id, $produto_id, $quantidade, $preco)";
+            mysqli_query($conn, $sql);
             
             // Atualizar estoque
-            $stmt = $conn->prepare("UPDATE produtos SET estoque = estoque - ? WHERE id = ?");
-            $stmt->bind_param("ii", $item['quantidade'], $item['produto_id']);
-            $stmt->execute();
+            $sql = "UPDATE produtos SET estoque = estoque - $quantidade WHERE id = $produto_id";
+            mysqli_query($conn, $sql);
         }
         
         // Limpar carrinho
         unset($_SESSION['carrinho']);
         
-        $_SESSION['pedido_sucesso'] = "Pedido #$pedido_id realizado com sucesso! Em breve entraremos em contato para confirmar o pagamento e o envio.";
-        header('Location: index.php');
+        // REDIRECIONAR PARA TELA DE CONFIRMAÇÃO
+        header('Location: pedido_confirmado.php?pedido_id=' . $pedido_id);
         exit;
     }
 }
@@ -207,25 +211,59 @@ foreach($_SESSION['carrinho'] as $item) {
     </style>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+    <!-- HEADER -->
+    <header id="inicio">
+        <div class="fixo">
+            <div class="header-top">
+                <div class="logo-container">
+                    <a href="index.php" style="text-decoration: none;">
+                        <span class="store-name">Mundo Gica</span>
+                    </a>
+                </div>
+                <div class="search-container">
+                    <input type="text" placeholder="Buscar esmaltes..." class="search-bar">
+                    <img src="img/lupa.png" alt="Lupa" class="lupa">
+                </div>
+                <div class="cart-container">
+                    <button class="cart-button" onclick="window.location.href='carrinho.php'">
+                        <img src="img/sacoladecompras.png" alt="Ícone de sacola">
+                        <span>Minha Sacola (<?php echo count($_SESSION['carrinho']); ?>)</span>
+                    </button>
+                </div>
+            </div>
+
+            <hr class="separator">
+
+            <nav>
+                <ul class="menu">
+                    <li><a href="index.php">Início</a></li>
+                    <li><a href="index.php#linkprodutos">Produtos</a></li>
+                    <li><a href="index.php#promocoes">Promoções</a></li>
+                    <li><a href="carrinho.php">Carrinho</a></li>
+                    <li><a href="logout.php">Sair (<?php echo $_SESSION['cliente_nome']; ?>)</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <div class="spacer"></div>
     
     <div class="finalizar-container">
-        <h1 class="finalizar-titulo">Finalizar Pedido</h1>
+        <h1 class="finalizar-titulo">🛒 Finalizar Pedido</h1>
         
         <?php if(isset($_SESSION['erro'])): ?>
             <div class="alert"><?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?></div>
         <?php endif; ?>
         
         <div class="resumo-pedido">
-            <h2>Resumo do Pedido</h2>
+            <h2>📋 Resumo do Pedido</h2>
             <?php foreach($_SESSION['carrinho'] as $item): ?>
                 <div class="resumo-item">
                     <div class="item-info">
                         <div class="item-imagem">
-                            <img src="<?php echo $item['imagem']; ?>" alt="<?php echo htmlspecialchars($item['nome']); ?>">
+                            <img src="<?php echo $item['imagem']; ?>" alt="<?php echo $item['nome']; ?>">
                         </div>
                         <div>
-                            <h3><?php echo htmlspecialchars($item['nome']); ?></h3>
+                            <h3><?php echo $item['nome']; ?></h3>
                             <p>Quantidade: <?php echo $item['quantidade']; ?></p>
                         </div>
                     </div>
@@ -236,15 +274,15 @@ foreach($_SESSION['carrinho'] as $item) {
             <?php endforeach; ?>
             
             <div class="total-pedido">
-                Total: R$ <?php echo number_format($total, 2, ',', '.'); ?>
+                💰 Total: R$ <?php echo number_format($total, 2, ',', '.'); ?>
             </div>
         </div>
         
         <form method="POST" action="" class="form-finalizar">
-            <h2>Informações de Entrega</h2>
+            <h2>📍 Informações de Entrega</h2>
             
             <div class="form-group">
-                <label for="endereco">Endereço de Entrega *</label>
+                <label for="endereco">Endereço Completo *</label>
                 <textarea id="endereco" name="endereco" rows="3" required placeholder="Rua, número, complemento, bairro, cidade - UF"></textarea>
             </div>
             
@@ -257,9 +295,9 @@ foreach($_SESSION['carrinho'] as $item) {
                 <label for="forma_pagamento">Forma de Pagamento *</label>
                 <select id="forma_pagamento" name="forma_pagamento" required>
                     <option value="">Selecione...</option>
-                    <option value="cartao">Cartão de Crédito</option>
-                    <option value="boleto">Boleto Bancário</option>
-                    <option value="pix">PIX</option>
+                    <option value="cartao">💳 Cartão de Crédito</option>
+                    <option value="boleto">📄 Boleto Bancário</option>
+                    <option value="pix">📱 PIX</option>
                 </select>
             </div>
             
@@ -268,7 +306,7 @@ foreach($_SESSION['carrinho'] as $item) {
                 <textarea id="observacoes" name="observacoes" rows="2" placeholder="Alguma observação sobre o pedido..."></textarea>
             </div>
             
-            <button type="submit" class="btn-finalizar">Confirmar Pedido</button>
+            <button type="submit" class="btn-finalizar">✅ Confirmar Pedido</button>
         </form>
     </div>
 </body>
