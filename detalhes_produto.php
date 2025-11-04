@@ -1,24 +1,43 @@
 <?php
 include 'conexao.php';
 
-// Verificar se tem ID do produto
 if(!isset($_GET['id'])) {
     header('Location: index.php');
     exit;
 }
 
-// Buscar produto
 $produto_id = $_GET['id'];
 $sql = "SELECT * FROM produtos WHERE id = $produto_id";
 $resultado = mysqli_query($conn, $sql);
 
-// Se não encontrou, voltar para index
 if(mysqli_num_rows($resultado) == 0) {
     header('Location: index.php');
     exit;
 }
 
 $produto = mysqli_fetch_assoc($resultado);
+
+// ARRAY COM OS CAMINHOS DAS IMAGENS FIXAS
+$imagens_produtos = [
+    1 => 'img/esmalteamar.png',
+    2 => 'img/esmalteescarlate.png',
+    3 => 'img/esmaltesoutopping.png',
+    4 => 'img/esmalteanonovonorio.png',
+    5 => 'img/esmalteolhogrego.png',
+    6 => 'img/esmaltetachovendofini.png',
+    7 => 'img/esmalteimensidao.png',
+    8 => 'img/esmaltedizeres.png',
+    9 => 'img/esmaltecaricia.png',
+    10 => 'img/esmaltelaçadaperfeita.png',
+    11 => 'img/esmaltevermelhaco.png',
+    12 => 'img/esmalteazulliberdade.png',
+    13 => 'img/esmaltesana.png',
+    14 => 'img/esmalteshits.png',
+    15 => 'img/esmaltesanita.png'
+];
+
+// Usar imagem do array, se não existir usa do banco
+$imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$produto_id] : $produto['imagem'];
 ?>
 
 <!DOCTYPE html>
@@ -272,7 +291,13 @@ $produto = mysqli_fetch_assoc($resultado);
     <!-- MENSAGENS -->
     <?php if(isset($_SESSION['sucesso'])): ?>
         <div style="background: #d1fae5; color: #065f46; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #a7f3d0;">
-            ✅ <?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?>
+            <?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if(isset($_SESSION['erro'])): ?>
+        <div style="background: #fee2e2; color: #dc2626; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #fecaca;">
+            <?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?>
         </div>
     <?php endif; ?>
 
@@ -280,7 +305,8 @@ $produto = mysqli_fetch_assoc($resultado);
     <div class="detalhes-container">
         <div class="produto-detalhes">
             <div class="produto-imagem">
-                <img src="<?php echo $produto['imagem']; ?>" alt="<?php echo $produto['nome']; ?>">
+                <!-- USANDO IMAGEM FIXA DO ARRAY -->
+                <img src="<?php echo $imagem_produto; ?>" alt="<?php echo $produto['nome']; ?>">
             </div>
             
             <div class="produto-info">

@@ -17,10 +17,10 @@ if(empty($_SESSION['carrinho'])) {
 
 // Processar finalização do pedido
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $endereco = trim($_POST['endereco']);
-    $cep = trim($_POST['cep']);
-    $forma_pagamento = trim($_POST['forma_pagamento']);
-    $observacoes = trim($_POST['observacoes']);
+    $endereco = mysqli_real_escape_string($conn, trim($_POST['endereco']));
+    $cep = mysqli_real_escape_string($conn, trim($_POST['cep']));
+    $forma_pagamento = mysqli_real_escape_string($conn, trim($_POST['forma_pagamento']));
+    $observacoes = mysqli_real_escape_string($conn, trim($_POST['observacoes']));
     
     // Validações
     if(empty($endereco) || empty($cep) || empty($forma_pagamento)) {
@@ -32,34 +32,40 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $total += $item['preco'] * $item['quantidade'];
         }
         
+        $cliente_id = $_SESSION['cliente_id'];
+        
         // Inserir pedido
         $sql = "INSERT INTO pedidos (cliente_id, total, status, endereco, cep, forma_pagamento, observacoes) 
-                VALUES ({$_SESSION['cliente_id']}, $total, 'pendente', '$endereco', '$cep', '$forma_pagamento', '$observacoes')";
-        mysqli_query($conn, $sql);
-        $pedido_id = mysqli_insert_id($conn);
+                VALUES ($cliente_id, $total, 'pendente', '$endereco', '$cep', '$forma_pagamento', '$observacoes')";
         
-        // Inserir itens do pedido e atualizar estoque
-        foreach($_SESSION['carrinho'] as $item) {
-            $produto_id = $item['produto_id'];
-            $quantidade = $item['quantidade'];
-            $preco = $item['preco'];
+        if(mysqli_query($conn, $sql)) {
+            $pedido_id = mysqli_insert_id($conn);
             
-            // Inserir item
-            $sql = "INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco) 
-                    VALUES ($pedido_id, $produto_id, $quantidade, $preco)";
-            mysqli_query($conn, $sql);
+            // Inserir itens do pedido e atualizar estoque
+            foreach($_SESSION['carrinho'] as $item) {
+                $produto_id = intval($item['produto_id']);
+                $quantidade = intval($item['quantidade']);
+                $preco = floatval($item['preco']);
+                
+                // Inserir item
+                $sql = "INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco) 
+                        VALUES ($pedido_id, $produto_id, $quantidade, $preco)";
+                mysqli_query($conn, $sql);
+                
+                // Atualizar estoque
+                $sql = "UPDATE produtos SET estoque = estoque - $quantidade WHERE id = $produto_id";
+                mysqli_query($conn, $sql);
+            }
             
-            // Atualizar estoque
-            $sql = "UPDATE produtos SET estoque = estoque - $quantidade WHERE id = $produto_id";
-            mysqli_query($conn, $sql);
+            // Limpar carrinho
+            unset($_SESSION['carrinho']);
+            
+            // ===== REDIRECIONAMENTO PARA PÁGINA DE CONFIRMAÇÃO =====
+            header('Location: pedido_confirmado.php?pedido_id=' . $pedido_id);
+            exit; // IMPORTANTE: Parar execução aqui
+        } else {
+            $_SESSION['erro'] = "Erro ao processar pedido. Tente novamente.";
         }
-        
-        // Limpar carrinho
-        unset($_SESSION['carrinho']);
-        
-        // REDIRECIONAR PARA TELA DE CONFIRMAÇÃO
-        header('Location: pedido_confirmado.php?pedido_id=' . $pedido_id);
-        exit;
     }
 }
 

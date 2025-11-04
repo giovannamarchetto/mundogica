@@ -19,34 +19,34 @@ if(!$usuario || $usuario['admin'] != 1) {
 }
 
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nome = trim($_POST['nome']);
-    $descricao = trim($_POST['descricao']);
+    $nome = mysqli_real_escape_string($conn, trim($_POST['nome']));
+    $descricao = mysqli_real_escape_string($conn, trim($_POST['descricao']));
     $preco = floatval($_POST['preco']);
-    $marca = trim($_POST['marca']);
+    $marca = mysqli_real_escape_string($conn, trim($_POST['marca']));
     $estoque = intval($_POST['estoque']);
-    $imagem = trim($_POST['imagem']);
+    $imagem = mysqli_real_escape_string($conn, trim($_POST['imagem']));
     
     // Verificar se é edição ou novo produto
     if(isset($_POST['id']) && !empty($_POST['id'])) {
         // Editar produto existente
         $id = intval($_POST['id']);
-        $stmt = $conn->prepare("UPDATE produtos SET nome = ?, descricao = ?, preco = ?, marca = ?, estoque = ?, imagem = ? WHERE id = ?");
-        $stmt->bind_param("ssdsis", $nome, $descricao, $preco, $marca, $estoque, $imagem, $id);
+        $sql = "UPDATE produtos SET nome = '$nome', descricao = '$descricao', preco = $preco, 
+                marca = '$marca', estoque = $estoque, imagem = '$imagem' WHERE id = $id";
         
-        if($stmt->execute()) {
-            $_SESSION['sucesso'] = "Produto atualizado com sucesso!";
+        if(mysqli_query($conn, $sql)) {
+            $_SESSION['sucesso'] = "✅ Produto atualizado com sucesso!";
         } else {
-            $_SESSION['erro'] = "Erro ao atualizar produto!";
+            $_SESSION['erro'] = "❌ Erro ao atualizar produto: " . mysqli_error($conn);
         }
     } else {
         // Inserir novo produto
-        $stmt = $conn->prepare("INSERT INTO produtos (nome, descricao, preco, marca, estoque, imagem) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssds is", $nome, $descricao, $preco, $marca, $estoque, $imagem);
+        $sql = "INSERT INTO produtos (nome, descricao, preco, marca, estoque, imagem) 
+                VALUES ('$nome', '$descricao', $preco, '$marca', $estoque, '$imagem')";
         
-        if($stmt->execute()) {
-            $_SESSION['sucesso'] = "Produto cadastrado com sucesso!";
+        if(mysqli_query($conn, $sql)) {
+            $_SESSION['sucesso'] = "✅ Produto cadastrado com sucesso!";
         } else {
-            $_SESSION['erro'] = "Erro ao cadastrar produto!";
+            $_SESSION['erro'] = "❌ Erro ao cadastrar produto: " . mysqli_error($conn);
         }
     }
     

@@ -19,13 +19,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     
     // Buscar informações do produto
-    $stmt = $conn->prepare("SELECT * FROM produtos WHERE id = ? AND estoque > 0");
-    $stmt->bind_param("i", $produto_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $sql = "SELECT * FROM produtos WHERE id = $produto_id AND estoque > 0";
+    $resultado = mysqli_query($conn, $sql);
     
-    if($result->num_rows > 0) {
-        $produto = $result->fetch_assoc();
+    if(mysqli_num_rows($resultado) > 0) {
+        $produto = mysqli_fetch_assoc($resultado);
         
         // Inicializar carrinho se não existir
         if(!isset($_SESSION['carrinho'])) {
@@ -42,7 +40,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $_SESSION['sucesso'] = "Quantidade atualizada no carrinho!";
                 } else {
                     $item['quantidade'] = $produto['estoque'];
-                    $_SESSION['erro'] = "Adicionamos apenas as unidades disponíveis em estoque (" . $produto['estoque'] . ")";
+                    $_SESSION['erro'] = "Adicionamos apenas as unidades disponíveis (" . $produto['estoque'] . ")";
                 }
                 $produto_existe = true;
                 break;
@@ -58,7 +56,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 'quantidade' => min($quantidade, $produto['estoque']),
                 'imagem' => $produto['imagem']
             ];
-            $_SESSION['sucesso'] = "Produto adicionado ao carrinho!";
+            $_SESSION['sucesso'] = "✅ " . $produto['nome'] . " adicionado ao carrinho!";
         }
     } else {
         $_SESSION['erro'] = "Produto não encontrado ou esgotado!";
