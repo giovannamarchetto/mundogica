@@ -96,3 +96,18 @@ UPDATE produtos SET imagem = 'https://via.placeholder.com/300x300/8b5cf6/ffffff?
 
 -- Verificar se atualizou
 SELECT id, nome, imagem FROM produtos;
+
+
+-- Alterações no Banco dps de criar os campos do pedido 
+
+USE loja_esmaltes1;
+
+ALTER TABLE pedidos 
+ADD COLUMN endereco TEXT AFTER status;
+ALTER TABLE pedidos 
+ADD COLUMN cep VARCHAR(20) AFTER endereco;
+ALTER TABLE pedidos 
+ADD COLUMN forma_pagamento VARCHAR(50) AFTER cep;
+ALTER TABLE pedidos 
+ADD COLUMN observacoes TEXT AFTER forma_pagamento;
+SELECT * FROM pedidos;

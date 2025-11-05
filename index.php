@@ -1,13 +1,41 @@
 <?php
 include 'conexao.php';
 
-// Buscar produtos do banco
-$sql = "SELECT * FROM produtos ORDER BY id ASC";
+// PEGAR FILTRO DE MARCA DA URL
+$marca_filtro = isset($_GET['marca']) ? $_GET['marca'] : 'todas';
+
+// BUSCAR PRODUTOS DO BANCO COM FILTRO
+if($marca_filtro == 'todas') {
+    $sql = "SELECT * FROM produtos ORDER BY id ASC";
+} else {
+    $marca_escaped = mysqli_real_escape_string($conn, $marca_filtro);
+    $sql = "SELECT * FROM produtos WHERE marca = '$marca_escaped' ORDER BY id ASC";
+}
+
 $resultado = mysqli_query($conn, $sql);
 $produtos = array();
 while($produto = mysqli_fetch_assoc($resultado)) {
     $produtos[] = $produto;
 }
+
+// ARRAY COM IMAGENS FIXAS
+$imagens_produtos = [
+    1 => 'img/esmalteamar.png',
+    2 => 'img/esmalteescarlate.png',
+    3 => 'img/esmaltesoutopping.png',
+    4 => 'img/esmalteanonovonorio.png',
+    5 => 'img/esmalteolhogrego.png',
+    6 => 'img/esmaltetachovendofini.png',
+    7 => 'img/esmalteimensidao.png',
+    8 => 'img/esmaltedizeres.png',
+    9 => 'img/esmaltecaricia.png',
+    10 => 'img/esmaltelaçadaperfeita.png',
+    11 => 'img/esmaltevermelhaco.png',
+    12 => 'img/esmalteazulliberdade.png',
+    13 => 'img/esmaltesana.png',
+    14 => 'img/esmalteshits.png',
+    15 => 'img/esmaltesanita.png'
+];
 ?>
 
 <!DOCTYPE html> 
@@ -15,8 +43,54 @@ while($produto = mysqli_fetch_assoc($resultado)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-commerce de Esmaltes - Atividade 2° bimestre Juliano</title>
+    <title>E-commerce de Esmaltes - Mundo GiCa</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ESTILOS PARA O FILTRO ATIVO */
+        .brand-options a {
+            display: inline-block;
+            padding: 10px 20px;
+            border: 2px solid #7c3aed;
+            border-radius: 25px;
+            background-color: #ffffff;
+            color: #7c3aed;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin: 5px;
+        }
+        
+        .brand-options a:hover {
+            background-color: #7c3aed;
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        
+        .brand-options a.active {
+            background-color: #7c3aed;
+            color: #ffffff;
+        }
+        
+        .mensagem-filtro {
+            text-align: center;
+            padding: 15px;
+            margin: 20px auto;
+            border-radius: 8px;
+            font-weight: 600;
+            max-width: 600px;
+        }
+        
+        .mensagem-sucesso {
+            background-color: #f0f9ff;
+            color: #0369a1;
+        }
+        
+        .mensagem-vazio {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+    </style>
 </head>
 <body>
   <!-- Grupo - Carla Victória Barros da Silva 09323067
@@ -101,235 +175,70 @@ while($produto = mysqli_fetch_assoc($resultado)) {
 
     <main>
       <div class="banner">
-        <div class="banner-content" src = "img/banner2.jpeg">
+        <div class="banner-content">
             <h1>Descubra Cores Incríveis!</h1>
             <p>Dê vida às suas unhas com as últimas tendências em esmaltes. Aproveite descontos de até <strong>20%</strong> nas coleções da estação!</p>
             <a href="#linkprodutos" class="banner-button">Confira Agora</a>
         </div>
     </div>
     
+<!-- FILTRO DE MARCAS COM PHP -->
 <div class="brand-filter">
   <h3>Filtrar por Marca</h3>
   <div class="brand-options">
-      <input type="radio" id="marca-risque" name="brand" />
-      <label for="marca-risque">Risqué</label>
-      
-      <input type="radio" id="marca-Dailus" name="brand" />
-      <label for="marca-Dailus">Dailus</label>
-      
-      <input type="radio" id="marca-Colorama" name="brand" />
-      <label for="marca-Colorama">Colorama</label>
-
-      <input type="radio" id="marca-Impala" name="brand" />
-      <label for="marca-Impala">Impala</label>
-
-      <input type="radio" id="marca-Avon" name="brand" />
-      <label for="marca-Avon">Avon</label>
-
-      <input type="radio" id="marca-Coleções" name="brand" />
-      <label for="marca-Coleções">Coleções</label>
-      
-      <input type="radio" id="marca-todas" name="brand" checked />
-      <label for="marca-todas">Todas as Marcas</label>
+      <a href="index.php?marca=Risqué#linkprodutos" class="<?php echo $marca_filtro == 'Risqué' ? 'active' : ''; ?>">Risqué</a>
+      <a href="index.php?marca=Dailus#linkprodutos" class="<?php echo $marca_filtro == 'Dailus' ? 'active' : ''; ?>">Dailus</a>
+      <a href="index.php?marca=Colorama#linkprodutos" class="<?php echo $marca_filtro == 'Colorama' ? 'active' : ''; ?>">Colorama</a>
+      <a href="index.php?marca=Impala#linkprodutos" class="<?php echo $marca_filtro == 'Impala' ? 'active' : ''; ?>">Impala</a>
+      <a href="index.php?marca=Avon#linkprodutos" class="<?php echo $marca_filtro == 'Avon' ? 'active' : ''; ?>">Avon</a>
+      <a href="index.php?marca=Coleções#linkprodutos" class="<?php echo $marca_filtro == 'Coleções' ? 'active' : ''; ?>">Coleções</a>
+      <a href="index.php?marca=todas#linkprodutos" class="<?php echo $marca_filtro == 'todas' ? 'active' : ''; ?>">Todas as Marcas</a>
   </div>
 </div>
+
+<!-- MENSAGEM DE RESULTADO DO FILTRO -->
+<?php if($marca_filtro != 'todas'): ?>
+    <?php if(count($produtos) > 0): ?>
+        <div class="mensagem-filtro mensagem-sucesso">
+            ✨ <?php echo count($produtos); ?> produto(s) encontrado(s) para "<?php echo htmlspecialchars($marca_filtro); ?>"
+        </div>
+    <?php else: ?>
+        <div class="mensagem-filtro mensagem-vazio">
+            😢 Nenhum produto encontrado para "<?php echo htmlspecialchars($marca_filtro); ?>"
+        </div>
+    <?php endif; ?>
+<?php endif; ?>
     
       <section class="produtos" id="linkprodutos">
         <h2>Nossos Produtos</h2>
-        <section class="produtos">
-            <!-- PRODUTO 1 -->
+        
+        <?php if(count($produtos) == 0): ?>
+            <div style="text-align: center; padding: 40px; width: 100%;">
+                <h3 style="color: #64748b;">Nenhum produto disponível nesta marca 😢</h3>
+                <p><a href="index.php?marca=todas#linkprodutos" style="color: #7c3aed; font-weight: 600;">← Ver todos os produtos</a></p>
+            </div>
+        <?php else: ?>
+            <?php foreach($produtos as $produto): 
+                // Usar imagem fixa do array
+                $imagem = isset($imagens_produtos[$produto['id']]) ? $imagens_produtos[$produto['id']] : $produto['imagem'];
+            ?>
             <div class="produto">
-              <!-- MUDANÇA AQUI: Agora vai para detalhes_produto.php -->
-              <a href="detalhes_produto.php?id=1">
-                <img src="img/esmalteamar.png" alt="Esmalte A.mar Risqué">
-                <h3>A.mar Risqué</h3>
+              <a href="detalhes_produto.php?id=<?php echo $produto['id']; ?>">
+                <img src="<?php echo $imagem; ?>" alt="<?php echo htmlspecialchars($produto['nome']); ?>">
+                <h3><?php echo htmlspecialchars($produto['nome']); ?></h3>
               </a>
-                <p>R$ 3,50</p>
-              <div class="rating">⭐⭐⭐⭐⭐ (12)</div>
+                <p>R$ <?php echo number_format($produto['preco'], 2, ',', '.'); ?></p>
+              <div class="rating">⭐⭐⭐⭐⭐</div>
               
               <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="1">
+                <input type="hidden" name="produto_id" value="<?php echo $produto['id']; ?>">
                 <input type="hidden" name="quantidade" value="1">
                 <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
               </form>
             </div>
-            
-            <!-- PRODUTO 2 -->
-            <div class="produto">
-              <a href="detalhes_produto.php?id=2">
-                <img src="img/esmalteescarlate.png" alt="Esmalte Escarlate Risqué">
-                <h3>Escarlate Risqué</h3>
-              </a>
-                <p>R$ 3,00</p>
-              <div class="rating">⭐⭐⭐⭐⭐ (15)</div>
-              
-              <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="2">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 3 -->
-          <div class="produto">
-              <a href="detalhes_produto.php?id=3">
-                <img src="img/esmaltesoutopping.png" alt="Esmalte Sou Topping Risqué">
-                <h3>Sou Topping Risqué</h3>
-              </a>
-                <p>R$ 4,00</p>
-              <div class="rating">⭐⭐⭐⭐⭐ (20)</div>
-              
-              <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="3">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 4 -->
-          <div class="produto">
-              <a href="detalhes_produto.php?id=4">
-                <img src="img/esmalteanonovonorio.png" alt="Esmalte Ano Novo no Rio Risqué">
-                <h3>Ano Novo no Rio Risqué</h3>
-              </a>
-                <p>R$ 7,00</p>
-              <div class="rating">⭐⭐⭐⭐⭐ (30)</div>
-              
-              <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="4">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 5 -->
-            <div class="produto">
-              <a href="detalhes_produto.php?id=5">
-                <img src="img/esmalteolhogrego.png" alt="Esmalte Olho Grego Dailus">
-                <h3>Olho Grego Dailus</h3>
-              </a>
-                <p>R$ 5,50</p>
-             <div class="rating">⭐⭐⭐⭐⭐ (15)</div>
-             
-             <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="5">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 6 -->
-            <div class="produto">
-              <a href="detalhes_produto.php?id=6">
-                <img src="img/esmaltetachovendofini.png" alt="Esmalte Tá Chovendo Fini Colorama">
-                <h3>Tá Chovendo Fini Colorama</h3>
-              </a>
-                <p>R$ 4,50</p>
-              <div class="rating">⭐⭐⭐⭐⭐ (09)</div>
-              
-              <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="6">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 7 -->
-            <div class="produto">
-              <a href="detalhes_produto.php?id=7">
-                <img src="img/esmalteimensidao.png" alt="Esmalte Imensidão Impala">
-                <h3>Imensidão Impala</h3>
-              </a>
-                <p>R$ 3,00</p>
-             <div class="rating">⭐⭐⭐⭐⭐ (12)</div>
-             
-             <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="7">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 8 -->
-            <div class="produto">
-              <a href="detalhes_produto.php?id=8">
-                <img src="img/esmaltedizeres.png" alt="Esmalte Dizeres Impala">
-                <h3>Dizeres Impala</h3>
-              </a>
-                <p>R$ 3,00</p>
-             <div class="rating">⭐⭐⭐⭐⭐ (07)</div>
-             
-             <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="8">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 9 -->
-            <div class="produto">
-              <a href="detalhes_produto.php?id=9">
-                <img src="img/esmaltecaricia.png" alt="Esmalte Carícia Impala">
-                <h3>Carícia Impala</h3>
-              </a>
-                <p>R$ 3,00</p>
-             <div class="rating">⭐⭐⭐⭐⭐ (14)</div>
-             
-             <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="9">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 10 -->
-            <div class="produto">
-              <a href="detalhes_produto.php?id=10">
-                <img src="img/esmaltelaçadaperfeita.png" alt="Esmalte Laçada Perfeita Impala">
-                <h3>Laçada Perfeita Impala</h3>
-              </a>
-                <p>R$ 3,50</p>
-             <div class="rating">⭐⭐⭐⭐⭐ (11)</div>
-             
-             <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="10">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 11 -->
-            <div class="produto">
-              <a href="detalhes_produto.php?id=11">
-                <img src="img/esmaltevermelhaco.png" alt="Esmalte Vermelhaço Avon">
-                <h3>Vermelhaço Avon</h3>
-              </a>
-                <p>R$ 7,00</p>
-             <div class="rating">⭐⭐⭐⭐⭐ (16)</div>
-             
-             <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="11">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-            
-            <!-- PRODUTO 12 -->
-            <div class="produto">
-              <a href="detalhes_produto.php?id=12">
-                <img src="img/esmalteazulliberdade.png " alt="Esmalte Azul Liberdade Avon">
-                <h3>Azul Liberdade Avon</h3>
-              </a>
-                <p>R$ 7,00</p>
-             <div class="rating">⭐⭐⭐⭐⭐ (12)</div>
-             
-             <form method="POST" action="adicionar_carrinho.php">
-                <input type="hidden" name="produto_id" value="12">
-                <input type="hidden" name="quantidade" value="1">
-                <button type="submit" class="banner-button">Adicionar ao Carrinho</button>
-              </form>
-            </div>
-        </section>
+            <?php endforeach; ?>
+        <?php endif; ?>
+      </section>
   </main>
 
   <div class="promotions-section" id="promocoes">
@@ -380,7 +289,7 @@ while($produto = mysqli_fetch_assoc($resultado)) {
     </div>
   </div>
 
-<section class="cadastrese"id="cadastro">
+<section class="cadastrese" id="cadastro">
   <h2>Faça seu cadastro para ficar por dentro das promoções!</h2>
   <form method="GET" action="cadastro.php">
       <input type="email" name="email" placeholder="Digite seu email" required>

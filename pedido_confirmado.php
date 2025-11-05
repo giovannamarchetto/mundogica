@@ -22,9 +22,6 @@ if(mysqli_num_rows($resultado) == 0) {
 }
 
 $pedido = mysqli_fetch_assoc($resultado);
-
-// Redirecionar para index após 5 segundos
-header("Refresh: 5; url=index.php");
 ?>
 
 <!DOCTYPE html>
@@ -154,8 +151,33 @@ header("Refresh: 5; url=index.php");
         
         .contador {
             color: #94a3b8;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             margin-top: 20px;
+            font-weight: 600;
+        }
+        
+        .contador-numero {
+            color: #7c3aed;
+            font-size: 2rem;
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        
+        .barra-progresso {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        
+        .barra-progresso-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #667eea);
+            border-radius: 10px;
+            transition: width 1s linear;
         }
     </style>
 </head>
@@ -209,8 +231,37 @@ header("Refresh: 5; url=index.php");
         <a href="index.php" class="btn-voltar">← Voltar para a Loja</a>
         
         <div class="contador">
-            Redirecionando automaticamente em <strong>5 segundos</strong>...
+            Redirecionando automaticamente em
+            <span class="contador-numero" id="countdown">60</span>
+            segundos
+        </div>
+        
+        <!-- Barra de progresso -->
+        <div class="barra-progresso">
+            <div class="barra-progresso-fill" id="progressBar" style="width: 100%;"></div>
         </div>
     </div>
+
+    <script>
+        // Contador regressivo de 60 segundos
+        let segundos = 60;
+        const countdownElement = document.getElementById('countdown');
+        const progressBar = document.getElementById('progressBar');
+        
+        const intervalo = setInterval(() => {
+            segundos--;
+            countdownElement.textContent = segundos;
+            
+            // Atualizar barra de progresso
+            const porcentagem = (segundos / 60) * 100;
+            progressBar.style.width = porcentagem + '%';
+            
+            // Quando chegar a 0, redireciona
+            if(segundos <= 0) {
+                clearInterval(intervalo);
+                window.location.href = 'index.php';
+            }
+        }, 1000);
+    </script>
 </body>
 </html>

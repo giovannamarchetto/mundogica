@@ -15,12 +15,31 @@ if(empty($_SESSION['carrinho'])) {
     exit;
 }
 
+// ARRAY COM IMAGENS FIXAS (para exibir corretamente)
+$imagens_produtos = [
+    1 => 'img/esmalteamar.png',
+    2 => 'img/esmalteescarlate.png',
+    3 => 'img/esmaltesoutopping.png',
+    4 => 'img/esmalteanonovonorio.png',
+    5 => 'img/esmalteolhogrego.png',
+    6 => 'img/esmaltetachovendofini.png',
+    7 => 'img/esmalteimensidao.png',
+    8 => 'img/esmaltedizeres.png',
+    9 => 'img/esmaltecaricia.png',
+    10 => 'img/esmaltelaçadaperfeita.png',
+    11 => 'img/esmaltevermelhaco.png',
+    12 => 'img/esmalteazulliberdade.png',
+    13 => 'img/esmaltesana.png',
+    14 => 'img/esmalteshits.png',
+    15 => 'img/esmaltesanita.png'
+];
+
 // Processar finalização do pedido
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $endereco = mysqli_real_escape_string($conn, trim($_POST['endereco']));
     $cep = mysqli_real_escape_string($conn, trim($_POST['cep']));
     $forma_pagamento = mysqli_real_escape_string($conn, trim($_POST['forma_pagamento']));
-    $observacoes = mysqli_real_escape_string($conn, trim($_POST['observacoes']));
+    $observacoes = isset($_POST['observacoes']) ? mysqli_real_escape_string($conn, trim($_POST['observacoes'])) : '';
     
     // Validações
     if(empty($endereco) || empty($cep) || empty($forma_pagamento)) {
@@ -34,7 +53,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         $cliente_id = $_SESSION['cliente_id'];
         
-        // Inserir pedido
+        // USAR CONSULTA TRADICIONAL (mais compatível)
         $sql = "INSERT INTO pedidos (cliente_id, total, status, endereco, cep, forma_pagamento, observacoes) 
                 VALUES ($cliente_id, $total, 'pendente', '$endereco', '$cep', '$forma_pagamento', '$observacoes')";
         
@@ -47,24 +66,24 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $quantidade = intval($item['quantidade']);
                 $preco = floatval($item['preco']);
                 
-                // Inserir item
-                $sql = "INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco) 
-                        VALUES ($pedido_id, $produto_id, $quantidade, $preco)";
-                mysqli_query($conn, $sql);
+                // Inserir item do pedido
+                $sql_item = "INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco) 
+                             VALUES ($pedido_id, $produto_id, $quantidade, $preco)";
+                mysqli_query($conn, $sql_item);
                 
                 // Atualizar estoque
-                $sql = "UPDATE produtos SET estoque = estoque - $quantidade WHERE id = $produto_id";
-                mysqli_query($conn, $sql);
+                $sql_estoque = "UPDATE produtos SET estoque = estoque - $quantidade WHERE id = $produto_id";
+                mysqli_query($conn, $sql_estoque);
             }
             
             // Limpar carrinho
             unset($_SESSION['carrinho']);
             
-            // ===== REDIRECIONAMENTO PARA PÁGINA DE CONFIRMAÇÃO =====
+            // Redirecionar para página de confirmação
             header('Location: pedido_confirmado.php?pedido_id=' . $pedido_id);
-            exit; // IMPORTANTE: Parar execução aqui
+            exit;
         } else {
-            $_SESSION['erro'] = "Erro ao processar pedido. Tente novamente.";
+            $_SESSION['erro'] = "Erro ao processar pedido: " . mysqli_error($conn);
         }
     }
 }
@@ -231,10 +250,15 @@ foreach($_SESSION['carrinho'] as $item) {
                     <img src="img/lupa.png" alt="Lupa" class="lupa">
                 </div>
                 <div class="cart-container">
-                    <button class="cart-button" onclick="window.location.href='carrinho.php'">
-                        <img src="img/sacoladecompras.png" alt="Ícone de sacola">
-                        <span>Minha Sacola (<?php echo count($_SESSION['carrinho']); ?>)</span>
-                    </button>
+                    <div style="text-align: center;">
+                        <button class="cart-button" onclick="window.location.href='carrinho.php'">
+                            <img src="img/sacoladecompras.png" alt="Ícone de sacola">
+                            <span>Minha Sacola (<?php echo count($_SESSION['carrinho']); ?>)</span>
+                        </button>
+                        <div style="font-size: 0.85rem; color: #7c3aed; font-weight: 600; margin-top: 5px;">
+                            Olá, <?php echo explode(' ', $_SESSION['cliente_nome'])[0]; ?>! 👋
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -246,7 +270,7 @@ foreach($_SESSION['carrinho'] as $item) {
                     <li><a href="index.php#linkprodutos">Produtos</a></li>
                     <li><a href="index.php#promocoes">Promoções</a></li>
                     <li><a href="carrinho.php">Carrinho</a></li>
-                    <li><a href="logout.php">Sair (<?php echo $_SESSION['cliente_nome']; ?>)</a></li>
+                    <li><a href="logout.php">Sair</a></li>
                 </ul>
             </nav>
         </div>
@@ -262,14 +286,17 @@ foreach($_SESSION['carrinho'] as $item) {
         
         <div class="resumo-pedido">
             <h2>📋 Resumo do Pedido</h2>
-            <?php foreach($_SESSION['carrinho'] as $item): ?>
+            <?php foreach($_SESSION['carrinho'] as $item): 
+                // USAR IMAGEM FIXA DO ARRAY
+                $imagem = isset($imagens_produtos[$item['produto_id']]) ? $imagens_produtos[$item['produto_id']] : $item['imagem'];
+            ?>
                 <div class="resumo-item">
                     <div class="item-info">
                         <div class="item-imagem">
-                            <img src="<?php echo $item['imagem']; ?>" alt="<?php echo $item['nome']; ?>">
+                            <img src="<?php echo $imagem; ?>" alt="<?php echo htmlspecialchars($item['nome']); ?>">
                         </div>
                         <div>
-                            <h3><?php echo $item['nome']; ?></h3>
+                            <h3><?php echo htmlspecialchars($item['nome']); ?></h3>
                             <p>Quantidade: <?php echo $item['quantidade']; ?></p>
                         </div>
                     </div>
