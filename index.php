@@ -108,11 +108,39 @@ $imagens_produtos = [
             <input type="text" placeholder="Buscar esmaltes..." class="search-bar">
             <img src="img/lupa.png" alt="Lupa" class="lupa">
         </div>
+        
+        <!-- AVATAR COM LETRA (OPÇÃO 3) -->
         <div class="cart-container">
-            <button class="cart-button" onclick="window.location.href='<?php echo isset($_SESSION['cliente_id']) ? 'carrinho.php' : 'login.php'; ?>'">
-                <img src="img/sacoladecompras.png" alt="Ícone de sacola">
-                <span>Minha Sacola<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
-            </button>
+            <?php if(isset($_SESSION['cliente_id'])): ?>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <!-- Carrinho -->
+                    <?php $total_itens = isset($_SESSION['carrinho']) ? count($_SESSION['carrinho']) : 0; ?>
+                    <a href="carrinho.php" class="cart-button" style="text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                        <span>Carrinho (<?php echo $total_itens; ?>)</span>
+                    </a>
+                    
+                    <!-- Card do usuário com Avatar -->
+                    <div style="display: flex; align-items: center; gap: 10px; background: rgba(124, 58, 237, 0.1); padding: 8px 15px; border-radius: 25px; border: 2px solid #7c3aed;">
+                        <!-- Avatar com inicial -->
+                        <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.1rem; flex-shrink: 0;">
+                            <?php 
+                            // PEGAR SÓ A PRIMEIRA LETRA DO PRIMEIRO NOME
+                            $primeiroNome = explode(' ', $_SESSION['cliente_nome'])[0];
+                            echo strtoupper(substr($primeiroNome, 0, 1)); 
+                            ?>
+                        </div>
+                        <!-- Nome (só primeiro nome) -->
+                        <span style="color: #7c3aed; font-weight: 600; white-space: nowrap;">
+                            <?php echo explode(' ', $_SESSION['cliente_nome'])[0]; ?>
+                        </span>
+                    </div>
+                </div>
+            <?php else: ?>
+                <button class="cart-button" onclick="window.location.href='login.php'">
+                    <img src="img/sacoladecompras.png" alt="Ícone de sacola">
+                    <span>Minha Sacola</span>
+                </button>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -136,13 +164,13 @@ $imagens_produtos = [
                     $usuario = mysqli_fetch_assoc($resultado_admin);
                     if($usuario['admin'] == 1):
                 ?>
-                    <li><a href="admin.php" style="background: #10b981; padding: 8px 15px; border-radius: 6px;">⚙️ Admin</a></li>
+                    <li><a href="admin.php" style="background: #10b981; padding: 8px 15px; border-radius: 6px;">Admin</a></li>
                 <?php 
                     endif;
                 }
                 ?>
                 
-                <li><a href="logout.php">Sair (<?php echo $_SESSION['cliente_nome']; ?>)</a></li>
+                <li><a href="logout.php">Sair</a></li>
             <?php else: ?>
                 <li><a href="cadastro.php">Cadastro</a></li>
                 <li><a href="login.php">Login</a></li>
@@ -157,19 +185,19 @@ $imagens_produtos = [
     <!-- MENSAGENS -->
     <?php if(isset($_SESSION['sucesso'])): ?>
         <div style="background: #d1fae5; color: #065f46; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #a7f3d0;">
-            ✅ <?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?>
+             <?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?>
         </div>
     <?php endif; ?>
 
     <?php if(isset($_SESSION['erro'])): ?>
         <div style="background: #fee2e2; color: #dc2626; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #fecaca;">
-            ⚠️ <?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?>
+             <?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?>
         </div>
     <?php endif; ?>
 
     <?php if(isset($_SESSION['pedido_sucesso'])): ?>
         <div style="background: #d1fae5; color: #065f46; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #a7f3d0;">
-            🎉 <?php echo $_SESSION['pedido_sucesso']; unset($_SESSION['pedido_sucesso']); ?>
+             <?php echo $_SESSION['pedido_sucesso']; unset($_SESSION['pedido_sucesso']); ?>
         </div>
     <?php endif; ?>
 
@@ -200,11 +228,11 @@ $imagens_produtos = [
 <?php if($marca_filtro != 'todas'): ?>
     <?php if(count($produtos) > 0): ?>
         <div class="mensagem-filtro mensagem-sucesso">
-            ✨ <?php echo count($produtos); ?> produto(s) encontrado(s) para "<?php echo htmlspecialchars($marca_filtro); ?>"
+             <?php echo count($produtos); ?> produto(s) encontrado(s) para "<?php echo htmlspecialchars($marca_filtro); ?>"
         </div>
     <?php else: ?>
         <div class="mensagem-filtro mensagem-vazio">
-            😢 Nenhum produto encontrado para "<?php echo htmlspecialchars($marca_filtro); ?>"
+             Nenhum produto encontrado para "<?php echo htmlspecialchars($marca_filtro); ?>"
         </div>
     <?php endif; ?>
 <?php endif; ?>
@@ -214,7 +242,7 @@ $imagens_produtos = [
         
         <?php if(count($produtos) == 0): ?>
             <div style="text-align: center; padding: 40px; width: 100%;">
-                <h3 style="color: #64748b;">Nenhum produto disponível nesta marca 😢</h3>
+                <h3 style="color: #64748b;">Nenhum produto disponível nesta marca </h3>
                 <p><a href="index.php?marca=todas#linkprodutos" style="color: #7c3aed; font-weight: 600;">← Ver todos os produtos</a></p>
             </div>
         <?php else: ?>
