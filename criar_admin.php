@@ -109,7 +109,7 @@ $stmt->bind_param("ssss", $nome, $email, $senha, $telefone);
             echo '<div class="warning">';
             echo '<h3>⚠ IMPORTANTE:</h3>';
             echo '<p><strong>Juliano, DELETE este arquivo (criar_admin.php) AGORA por segurança!</strong></p>';
-            echo '<p>Qualquer pessoa pode executá-lo e criar um administrador.</p>';
+            echo '<p>Qualquer pessoa pode executá-lo e criar um administrador, e pior ainda, quebrar todo o código :(.</p>';
             echo '</div>';
             
             echo '<a href="login.php">Fazer Login como Admin</a>';

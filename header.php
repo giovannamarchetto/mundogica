@@ -18,7 +18,7 @@
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <?php $total_itens = isset($_SESSION['carrinho']) ? count($_SESSION['carrinho']) : 0; ?>
                         <a href="carrinho.php" class="cart-button" style="text-decoration: none; display: flex; align-items: center; gap: 5px;">
-                            <span>Sacola(<?php echo $total_itens; ?>)</span>
+                        <span>Carrinho<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
                         </a>
                         
                         <div style="display: flex; align-items: center; gap: 10px; background: rgba(124, 58, 237, 0.1); padding: 8px 15px; border-radius: 25px; border: 2px solid #7c3aed;">

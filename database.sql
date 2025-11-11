@@ -1,7 +1,6 @@
 CREATE DATABASE IF NOT EXISTS loja_esmaltes1;
 USE loja_esmaltes1;
 
--- Tabela de clientes com campo admin
 CREATE TABLE IF NOT EXISTS clientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -12,7 +11,6 @@ CREATE TABLE IF NOT EXISTS clientes (
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de produtos
 CREATE TABLE IF NOT EXISTS produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -24,7 +22,6 @@ CREATE TABLE IF NOT EXISTS produtos (
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de pedidos
 CREATE TABLE IF NOT EXISTS pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id INT,
@@ -38,7 +35,6 @@ CREATE TABLE IF NOT EXISTS pedidos (
     FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
 
--- Tabela de itens do pedido
 CREATE TABLE IF NOT EXISTS pedido_itens (
     id INT AUTO_INCREMENT PRIMARY KEY,
     pedido_id INT,
@@ -49,7 +45,6 @@ CREATE TABLE IF NOT EXISTS pedido_itens (
     FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
--- Inserir produtos
 INSERT INTO produtos (nome, descricao, preco, imagem, marca, estoque) VALUES
 ('A.mar Risqué', 'Nova cor de esmalte da nossa amada linha de esmaltes! Alta durabilidade, brilho intenso e secagem rápida', 3.50, 'img/esmalteamar.png', 'Risqué', 50),
 ('Escarlate Risqué', 'Nosso querido vermelho escarlate! Alta durabilidade, brilho intenso e secagem rápida', 3.00, 'img/esmalteescarlate.png', 'Risqué', 45),
@@ -67,17 +62,10 @@ INSERT INTO produtos (nome, descricao, preco, imagem, marca, estoque) VALUES
 ('Coleção Hits Diamante', 'Os melhores glitters! Alta durabilidade, brilho intenso e secagem rápida', 48.00, 'img/esmalteshits.png', 'Coleções', 18),
 ('Coleção Anita Capadócia', 'Todos os tons! Alta durabilidade, brilho intenso e secagem rápida', 37.00, 'img/esmaltesanita.png', 'Coleções', 22);
 
--- EXECUTE ESTE SQL NO PHPMYADMIN PARA USAR IMAGENS DE PLACEHOLDER
--- Isso vai fazer as imagens aparecerem automaticamente!
+
 
 USE loja_esmaltes;
 
--- EXECUTE ESTE SQL NO PHPMYADMIN
--- Vai atualizar as imagens para URLs que FUNCIONAM
-
-USE loja_esmaltes;
-
--- Atualizar todas as imagens para placeholders coloridos
 UPDATE produtos SET imagem = 'https://via.placeholder.com/300x300/7c3aed/ffffff?text=A.mar' WHERE id = 1;
 UPDATE produtos SET imagem = 'https://via.placeholder.com/300x300/dc2626/ffffff?text=Escarlate' WHERE id = 2;
 UPDATE produtos SET imagem = 'https://via.placeholder.com/300x300/f59e0b/ffffff?text=Sou+Topping' WHERE id = 3;
@@ -94,11 +82,9 @@ UPDATE produtos SET imagem = 'https://via.placeholder.com/300x300/db2777/ffffff?
 UPDATE produtos SET imagem = 'https://via.placeholder.com/300x300/eab308/ffffff?text=Hits+Diamante' WHERE id = 14;
 UPDATE produtos SET imagem = 'https://via.placeholder.com/300x300/8b5cf6/ffffff?text=Anita' WHERE id = 15;
 
--- Verificar se atualizou
 SELECT id, nome, imagem FROM produtos;
 
 
--- Alterações no Banco dps de criar os campos do pedido 
 
 USE loja_esmaltes1;
 

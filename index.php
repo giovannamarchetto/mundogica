@@ -4,15 +4,34 @@ include 'conexao.php';
 // PEGAR FILTRO DE MARCA DA URL
 $marca_filtro = isset($_GET['marca']) ? $_GET['marca'] : 'todas';
 
-// BUSCAR PRODUTOS (EXCLUINDO COLEÇÕES DE "TODAS")
+// PEGAR TERMO DE BUSCA
+$busca = isset($_GET['busca']) ? trim($_GET['busca']) : '';
+
+// CONSTRUIR QUERY COM FILTROS
+$where_conditions = [];
+
+// Filtro de marca (excluindo coleções de "todas")
 if($marca_filtro == 'todas') {
-    $sql = "SELECT * FROM produtos WHERE marca != 'Coleções' ORDER BY id ASC";
+    $where_conditions[] = "marca != 'Coleções'";
 } elseif($marca_filtro == 'Coleções') {
-    $sql = "SELECT * FROM produtos WHERE marca = 'Coleções' ORDER BY id ASC";
+    $where_conditions[] = "marca = 'Coleções'";
 } else {
     $marca_escaped = mysqli_real_escape_string($conn, $marca_filtro);
-    $sql = "SELECT * FROM produtos WHERE marca = '$marca_escaped' ORDER BY id ASC";
+    $where_conditions[] = "marca = '$marca_escaped'";
 }
+
+// Filtro de busca
+if(!empty($busca)) {
+    $busca_escaped = mysqli_real_escape_string($conn, $busca);
+    $where_conditions[] = "(nome LIKE '%$busca_escaped%' OR descricao LIKE '%$busca_escaped%' OR marca LIKE '%$busca_escaped%')";
+}
+
+// Montar SQL
+$sql = "SELECT * FROM produtos";
+if(count($where_conditions) > 0) {
+    $sql .= " WHERE " . implode(" AND ", $where_conditions);
+}
+$sql .= " ORDER BY id ASC";
 
 $resultado = mysqli_query($conn, $sql);
 $produtos = array();
@@ -92,7 +111,6 @@ $imagens_produtos = [
             color: #92400e;
         }
 
-        /* NOTIFICAÇÃO FLUTUANTE */
         .notificacao-flutuante {
             position: fixed;
             top: 20px;
@@ -151,7 +169,6 @@ $imagens_produtos = [
             content: '⚠';
         }
 
-        /* AVATAR ESTILO */
         .user-avatar {
             width: 45px;
             height: 45px;
@@ -172,6 +189,28 @@ $imagens_produtos = [
         .user-avatar:hover {
             transform: scale(1.1);
         }
+
+        /* Estilo para limpar busca */
+        .limpar-busca {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .limpar-busca a {
+            color: #7c3aed;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 20px;
+            border: 2px solid #7c3aed;
+            border-radius: 20px;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .limpar-busca a:hover {
+            background: #7c3aed;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -184,8 +223,11 @@ $imagens_produtos = [
             </a>
         </div>
         <div class="search-container">
-            <input type="text" placeholder="Buscar esmaltes..." class="search-bar">
-            <img src="img/lupa.png" alt="Lupa" class="lupa">
+            <form method="GET" action="index.php#linkprodutos">
+                <input type="text" name="busca" placeholder="Buscar esmaltes..." class="search-bar" value="<?php echo htmlspecialchars($busca); ?>">
+                <button type="submit" style="display: none;"></button>
+            </form>
+            <img src="img/lupa.png" alt="Lupa" class="lupa" onclick="this.parentElement.querySelector('form').submit();">
         </div>
         
         <div class="cart-container">
@@ -194,10 +236,9 @@ $imagens_produtos = [
                     <?php $total_itens = isset($_SESSION['carrinho']) ? count($_SESSION['carrinho']) : 0; ?>
                     <button class="cart-button" onclick="window.location.href='carrinho.php'">
                         <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
-                        <span>Sacola (<?php echo $total_itens; ?>)</span>
+                        <span>Carrinho (<?php echo $total_itens; ?>)</span>
                     </button>
                     
-                    <!-- AVATAR SÓ COM LETRA -->
                     <div class="user-avatar" title="<?php echo $_SESSION['cliente_nome']; ?>">
                         <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
                     </div>
@@ -205,7 +246,7 @@ $imagens_produtos = [
             <?php else: ?>
                 <button class="cart-button" onclick="window.location.href='login.php'">
                     <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
-                    <span>Minha Sacola</span>
+                        <span>Carrinho<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
                 </button>
             <?php endif; ?>
         </div>
@@ -248,7 +289,6 @@ $imagens_produtos = [
 
 <div class="spacer"></div>
 
-    <!-- NOTIFICAÇÕES FLUTUANTES -->
     <?php if(isset($_SESSION['sucesso'])): ?>
         <div class="notificacao-flutuante notificacao-sucesso">
             <strong><?php echo $_SESSION['sucesso']; ?></strong>
@@ -297,16 +337,27 @@ $imagens_produtos = [
 <div class="brand-filter">
   <h3>Filtrar por Marca</h3>
   <div class="brand-options">
-      <a href="index.php?marca=Risqué#linkprodutos" class="<?php echo $marca_filtro == 'Risqué' ? 'active' : ''; ?>">Risqué</a>
-      <a href="index.php?marca=Dailus#linkprodutos" class="<?php echo $marca_filtro == 'Dailus' ? 'active' : ''; ?>">Dailus</a>
-      <a href="index.php?marca=Colorama#linkprodutos" class="<?php echo $marca_filtro == 'Colorama' ? 'active' : ''; ?>">Colorama</a>
-      <a href="index.php?marca=Impala#linkprodutos" class="<?php echo $marca_filtro == 'Impala' ? 'active' : ''; ?>">Impala</a>
-      <a href="index.php?marca=Avon#linkprodutos" class="<?php echo $marca_filtro == 'Avon' ? 'active' : ''; ?>">Avon</a>
-      <a href="index.php?marca=todas#linkprodutos" class="<?php echo $marca_filtro == 'todas' ? 'active' : ''; ?>">Todas as Marcas</a>
+      <a href="index.php?marca=Risqué<?php echo !empty($busca) ? '&busca='.urlencode($busca) : ''; ?>#linkprodutos" class="<?php echo $marca_filtro == 'Risqué' ? 'active' : ''; ?>">Risqué</a>
+      <a href="index.php?marca=Dailus<?php echo !empty($busca) ? '&busca='.urlencode($busca) : ''; ?>#linkprodutos" class="<?php echo $marca_filtro == 'Dailus' ? 'active' : ''; ?>">Dailus</a>
+      <a href="index.php?marca=Colorama<?php echo !empty($busca) ? '&busca='.urlencode($busca) : ''; ?>#linkprodutos" class="<?php echo $marca_filtro == 'Colorama' ? 'active' : ''; ?>">Colorama</a>
+      <a href="index.php?marca=Impala<?php echo !empty($busca) ? '&busca='.urlencode($busca) : ''; ?>#linkprodutos" class="<?php echo $marca_filtro == 'Impala' ? 'active' : ''; ?>">Impala</a>
+      <a href="index.php?marca=Avon<?php echo !empty($busca) ? '&busca='.urlencode($busca) : ''; ?>#linkprodutos" class="<?php echo $marca_filtro == 'Avon' ? 'active' : ''; ?>">Avon</a>
+      <a href="index.php?marca=todas<?php echo !empty($busca) ? '&busca='.urlencode($busca) : ''; ?>#linkprodutos" class="<?php echo $marca_filtro == 'todas' ? 'active' : ''; ?>">Todas as Marcas</a>
   </div>
 </div>
 
-<?php if($marca_filtro != 'todas'): ?>
+<?php if(!empty($busca)): ?>
+    <div class="mensagem-filtro mensagem-sucesso">
+        🔍 Buscando por: "<strong><?php echo htmlspecialchars($busca); ?></strong>" 
+        <?php if($marca_filtro != 'todas'): ?>
+            em "<?php echo htmlspecialchars($marca_filtro); ?>"
+        <?php endif; ?>
+        - <?php echo count($produtos); ?> resultado(s) encontrado(s)
+    </div>
+    <div class="limpar-busca">
+        <a href="index.php?marca=<?php echo $marca_filtro; ?>#linkprodutos">✕ Limpar Busca</a>
+    </div>
+<?php elseif($marca_filtro != 'todas'): ?>
     <?php if(count($produtos) > 0): ?>
         <div class="mensagem-filtro mensagem-sucesso">
             ✓ <?php echo count($produtos); ?> produto(s) encontrado(s) para "<?php echo htmlspecialchars($marca_filtro); ?>"
@@ -323,8 +374,16 @@ $imagens_produtos = [
         
         <?php if(count($produtos) == 0): ?>
             <div style="text-align: center; padding: 40px; width: 100%;">
-                <h3 style="color: #64748b;">Nenhum produto disponível nesta marca</h3>
-                <p><a href="index.php?marca=todas#linkprodutos" style="color: #7c3aed; font-weight: 600;">← Ver todos os produtos</a></p>
+                <h3 style="color: #64748b;">
+                    <?php if(!empty($busca)): ?>
+                        Nenhum produto encontrado para "<?php echo htmlspecialchars($busca); ?>"
+                    <?php else: ?>
+                        Nenhum produto disponível nesta marca
+                    <?php endif; ?>
+                </h3>
+                <p>
+                    <a href="index.php?marca=todas#linkprodutos" style="color: #7c3aed; font-weight: 600;">← Ver todos os produtos</a>
+                </p>
             </div>
         <?php else: ?>
             <?php foreach($produtos as $produto): 
@@ -384,10 +443,10 @@ $imagens_produtos = [
             <a href="detalhes_produto.php?id=15">
                 <img src="img/esmaltesanita.png" alt="Coleção Anita Capadócia">
                 <h3 class="promotion-item-title">Coleção Anita Capadócia</h3>
+                
             </a>
             <p class="promotion-item-price">R$ 37,00</p>
-            <p class="promotion-item-discount">Desconto de 10%</p>
-            
+            <p class="promotion-item-discount">Desconto de 10%</p>            
             <form method="POST" action="adicionar_carrinho.php">
                 <input type="hidden" name="produto_id" value="15">
                 <input type="hidden" name="quantidade" value="1">

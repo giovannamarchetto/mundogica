@@ -242,7 +242,7 @@ foreach($_SESSION['carrinho'] as $item) {
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <button class="cart-button" onclick="window.location.href='carrinho.php'">
                             <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
-                            <span>Minha Sacola (<?php echo count($_SESSION['carrinho']); ?>)</span>
+                        <span>Carrinho<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
                         </button>
                         
                         <!-- AVATAR SÓ COM LETRA E DEGRADÊ -->
@@ -269,7 +269,7 @@ foreach($_SESSION['carrinho'] as $item) {
     <div class="spacer"></div>
     
     <div class="finalizar-container">
-        <h1 class="finalizar-titulo">🛒 Finalizar Pedido</h1>
+        <h1 class="finalizar-titulo">Finalizar Pedido</h1>
         
         <?php if(isset($_SESSION['erro'])): ?>
             <div class="alert"><?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?></div>

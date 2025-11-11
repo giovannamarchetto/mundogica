@@ -248,7 +248,7 @@ while($row = mysqli_fetch_assoc($resultado)) {
                 <div class="cart-container">
                     <button class="cart-button" onclick="window.location.href='carrinho.php'">
                         <img src="img/sacoladecompras.png" alt="Ícone de sacola">
-                        <span>Sacola<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
+                        <span>Carrinho<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
                     </button>
                 </div>
             </div>
@@ -262,7 +262,7 @@ while($row = mysqli_fetch_assoc($resultado)) {
                     <li><a href="index.php#promocoes">Promoções</a></li>
                     <li><a href="carrinho.php">Carrinho</a></li>
                     <li><a href="admin.php" style="background: #10b981; padding: 15px 15px; border-radius: 0px;">Admin</a></li>
-                    <li><a href="logout.php">Sair (<?php echo $_SESSION['cliente_nome']; ?>)</a></li>
+                    <li><a href="logout.php">Sair</a></li>
                 </ul>
             </nav>
         </div>

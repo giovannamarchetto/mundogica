@@ -7,7 +7,7 @@ if(!isset($_SESSION['cliente_id'])) {
     exit;
 }
 
-// ARRAY COM IMAGENS FIXAS - MUITO IMPORTANTE!
+// ARRAY COM IMAGENS FIXAS
 $imagens_produtos = [
     1 => 'img/esmalteamar.png',
     2 => 'img/esmalteescarlate.png',
@@ -49,12 +49,25 @@ if(isset($_SESSION['carrinho'])) {
 }
 
 $total_carrinho = 0;
+
+// ⭐ VERIFICAR SE É ADMIN - CORREÇÃO PRINCIPAL ⭐
+$is_admin = false;
+if(isset($_SESSION['cliente_id'])) {
+    $cliente_id = $_SESSION['cliente_id'];
+    $sql_admin = "SELECT admin FROM clientes WHERE id = $cliente_id";
+    $resultado_admin = mysqli_query($conn, $sql_admin);
+    if($resultado_admin && mysqli_num_rows($resultado_admin) > 0) {
+        $usuario = mysqli_fetch_assoc($resultado_admin);
+        $is_admin = ($usuario['admin'] == 1);
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrinho - Mundo GiCa</title>
     <link rel="stylesheet" href="style.css">
     <style>
@@ -259,14 +272,17 @@ $total_carrinho = 0;
                     </a>
                 </div>
                 <div class="search-container">
-                    <input type="text" placeholder="Buscar esmaltes..." class="search-bar">
-                    <img src="img/lupa.png" alt="Lupa" class="lupa">
+                    <form method="GET" action="index.php#linkprodutos">
+                        <input type="text" name="busca" placeholder="Buscar esmaltes..." class="search-bar">
+                        <button type="submit" style="display: none;"></button>
+                    </form>
+                    <img src="img/lupa.png" alt="Lupa" class="lupa" onclick="this.parentElement.querySelector('form').submit();">
                 </div>
                 <div class="cart-container">
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <button class="cart-button" onclick="window.location.href='carrinho.php'">
                             <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
-                            <span>Minha Sacola (<?php echo count($itens_carrinho); ?>)</span>
+                            <span>Carrinho (<?php echo count($itens_carrinho); ?>)</span>
                         </button>
                         
                         <div class="user-avatar" title="<?php echo $_SESSION['cliente_nome']; ?>">
@@ -284,6 +300,11 @@ $total_carrinho = 0;
                     <li><a href="index.php#linkprodutos">Produtos</a></li>
                     <li><a href="index.php#promocoes">Promoções</a></li>
                     <li><a href="carrinho.php">Carrinho</a></li>
+                    
+                    <?php if($is_admin): ?>
+                        <li><a href="admin.php" style="background: #10b981; padding: 15px 15px; border-radius: 0px;">Admin</a></li>
+                    <?php endif; ?>
+                    
                     <li><a href="logout.php">Sair</a></li>
                 </ul>
             </nav>
@@ -304,17 +325,16 @@ $total_carrinho = 0;
     <?php endif; ?>
     
     <div class="carrinho-container">
-        <h1 class="carrinho-titulo">🛒 Meu Carrinho</h1>
+        <h1 class="carrinho-titulo">Meu Carrinho</h1>
         
         <?php if(empty($itens_carrinho)): ?>
             <div class="carrinho-vazio">
-                <h2>😢 Seu carrinho está vazio</h2>
+                <h2>Seu carrinho está vazio</h2>
                 <p><a href="index.php">← Continue comprando</a></p>
             </div>
         <?php else: ?>
             <div class="carrinho-itens">
                 <?php foreach($itens_carrinho as $item): 
-                    // USAR IMAGEM DO ARRAY FIXO
                     $produto_id = intval($item['produto_id']);
                     $imagem = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$produto_id] : 'img/placeholder.png';
                     
@@ -339,17 +359,17 @@ $total_carrinho = 0;
                         <a href="carrinho.php?remover=<?php echo $item['produto_id']; ?>" 
                            class="btn-remover" 
                            onclick="return confirm('Deseja remover este produto?')">
-                            🗑️ Remover
+                            Remover
                         </a>
                     </div>
                 <?php endforeach; ?>
             </div>
             
             <div class="carrinho-total">
-                💰 Total: R$ <?php echo number_format($total_carrinho, 2, ',', '.'); ?>
+                Total: R$ <?php echo number_format($total_carrinho, 2, ',', '.'); ?>
             </div>
             
-            <a href="finalizar_pedido.php" class="btn-finalizar">✅ Finalizar Pedido</a>
+            <a href="finalizar_pedido.php" class="btn-finalizar">Finalizar Pedido</a>
         <?php endif; ?>
     </div>
 </body>

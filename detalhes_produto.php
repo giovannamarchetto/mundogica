@@ -302,7 +302,7 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                         <?php if(isset($_SESSION['cliente_id'])): ?>
                             <button class="cart-button" onclick="window.location.href='carrinho.php'">
                                 <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
-                                <span>Minha Sacola<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
+                                <span>Carrinho<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
                             </button>
                             
                             <div class="user-avatar" title="<?php echo $_SESSION['cliente_nome']; ?>">
@@ -311,7 +311,7 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                         <?php else: ?>
                             <button class="cart-button" onclick="window.location.href='login.php'">
                                 <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
-                                <span>Minha Sacola</span>
+                                <span>Meu Carrinho</span>
                             </button>
                         <?php endif; ?>
                     </div>
@@ -337,7 +337,7 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                             $usuario = mysqli_fetch_assoc($resultado_admin);
                             if($usuario['admin'] == 1):
                         ?>
-                            <li><a href="admin.php" style="background: #10b981; padding: 8px 15px; border-radius: 6px;">Admin</a></li>
+                            <li><a href="admin.php" style="background: #10b981; padding: 15px 15px; border-radius: 0px;">Admin</a></li>
                         <?php 
                             endif;
                         }
@@ -388,13 +388,13 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                 <h1><?php echo $produto['nome']; ?></h1>
                 
                 <div class="produto-marca">
-                    📦 Marca: <?php echo $produto['marca']; ?>
+                    Marca: <?php echo $produto['marca']; ?>
                 </div>
                 
                 <div class="rating">⭐⭐⭐⭐⭐</div>
                 
                 <div class="produto-preco">
-                    💰 R$ <?php echo number_format($produto['preco'], 2, ',', '.'); ?>
+                    R$ <?php echo number_format($produto['preco'], 2, ',', '.'); ?>
                 </div>
                 
                 <div class="estoque-info <?php 
@@ -418,7 +418,7 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                 </div>
                 
                 <div class="produto-descricao">
-                    <strong>📝 Descrição:</strong><br><br>
+                    <strong>Descrição:</strong><br><br>
                     <?php echo nl2br($produto['descricao']); ?>
                 </div>
                 
@@ -437,12 +437,12 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                                class="quantidade-input">
                         
                         <button type="submit" class="btn-adicionar">
-                            🛒 Adicionar ao Carrinho
+                            Adicionar ao Carrinho
                         </button>
                     </form>
                 <?php else: ?>
                     <button class="btn-adicionar" disabled>
-                        ❌ Produto Esgotado
+                        Produto Esgotado
                     </button>
                 <?php endif; ?>
                 
