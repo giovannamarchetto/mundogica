@@ -1,9 +1,6 @@
 <?php
 include 'conexao.php';
 
-// ATENÇÃO: Execute este arquivo apenas UMA VEZ e depois DELETE ele por segurança!
-
-// Verificar se já existe admin
 $check = $conn->query("SELECT COUNT(*) as total FROM clientes WHERE admin = 1");
 $result = $check->fetch_assoc();
 
@@ -14,7 +11,6 @@ if($result['total'] > 0) {
     exit;
 }
 
-// Criar um usuário administrador
 $nome = "Administrador";
 $email = "admin@mundogica.com";
 $senha = password_hash("admin123", PASSWORD_DEFAULT);
@@ -96,7 +92,7 @@ $stmt->bind_param("ssss", $nome, $email, $senha, $telefone);
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Criar Administrador</h1>
+        <h1>Criar Administrador</h1>
         
         <?php
         if($stmt->execute()) {

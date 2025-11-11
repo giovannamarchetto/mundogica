@@ -4,7 +4,6 @@ include 'conexao.php';
 $erro = '';
 $sucesso = '';
 
-// Pré-preencher email se vier da newsletter
 $email_preenchido = isset($_GET['email']) ? htmlspecialchars($_GET['email']) : '';
 
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -14,7 +13,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $confirmar_senha = $_POST['confirmar_senha'];
     $telefone = trim($_POST['telefone']);
     
-    // Validações
     if(empty($nome) || empty($email) || empty($senha)) {
         $erro = "Todos os campos obrigatórios devem ser preenchidos!";
     } elseif($senha !== $confirmar_senha) {
@@ -24,7 +22,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $erro = "E-mail inválido!";
     } else {
-        // Verificar se email já existe
         $stmt = $conn->prepare("SELECT id FROM clientes WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -33,7 +30,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         if($result->num_rows > 0) {
             $erro = "Este e-mail já está cadastrado!";
         } else {
-            // Inserir novo cliente
             $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("INSERT INTO clientes (nome, email, senha, telefone) VALUES (?, ?, ?, ?)");
             $stmt->bind_param("ssss", $nome, $email, $senha_hash, $telefone);
@@ -57,7 +53,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Cadastro - Mundo GiCa</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* RESET PARA PÁGINA CLEAN */
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -66,24 +61,23 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             justify-content: center;
             padding: 20px;
             margin: 0;
-            overflow: hidden; /* Evita scroll */
+            overflow: hidden; 
         }
         
-        /* Esconder header e footer se existirem */
         header, footer, .spacer {
             display: none !important;
         }
         
         .cadastro-container {
-            max-width: 700px; /* Aumentado para 2 colunas */
+            max-width: 700px; 
             width: 100%;
-            padding: 35px 40px; /* Padding reduzido */
+            padding: 35px 40px;
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             animation: fadeIn 0.5s ease;
-            max-height: 90vh; /* Limita altura */
-            overflow-y: auto; /* Scroll só se necessário */
+            max-height: 90vh;
+            overflow-y: auto; 
         }
         
         @keyframes fadeIn {
@@ -99,12 +93,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .logo-cadastro {
             text-align: center;
-            margin-bottom: 20px; /* Reduzido */
+            margin-bottom: 20px; 
         }
         
         .logo-cadastro h1 {
             color: #7c3aed;
-            font-size: 2rem; /* Reduzido */
+            font-size: 2rem; 
             margin-bottom: 5px;
         }
         
@@ -115,12 +109,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .cadastro-container h2 {
             text-align: center;
-            margin-bottom: 20px; /* Reduzido */
+            margin-bottom: 20px; 
             color: #334155;
-            font-size: 1.5rem; /* Reduzido */
+            font-size: 1.5rem; 
         }
         
-        /* GRID 2 COLUNAS */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -129,11 +122,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         .form-group {
-            margin-bottom: 0; /* Remove margin quando no grid */
+            margin-bottom: 0; 
         }
         
         .form-group.full-width {
-            grid-column: 1 / -1; /* Ocupa 2 colunas */
+            grid-column: 1 / -1; 
         }
         
         .form-group label {
@@ -146,7 +139,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .form-group input {
             width: 100%;
-            padding: 10px; /* Reduzido */
+            padding: 10px; 
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             font-size: 0.95rem;
@@ -162,7 +155,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .btn-cadastrar {
             width: 100%;
-            padding: 12px; /* Reduzido */
+            padding: 12px; 
             background-color: #7c3aed;
             color: white;
             border: none;
@@ -182,7 +175,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .login-link {
             text-align: center;
-            margin-top: 15px; /* Reduzido */
+            margin-top: 15px; 
             color: #64748b;
             font-size: 0.9rem;
         }
@@ -199,9 +192,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         .alert {
-            padding: 12px; /* Reduzido */
+            padding: 12px; 
             border-radius: 8px;
-            margin-bottom: 15px; /* Reduzido */
+            margin-bottom: 15px; 
             animation: slideDown 0.3s ease;
             font-size: 0.9rem;
         }
@@ -231,7 +224,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         .voltar-home {
             text-align: center;
-            margin-top: 12px; /* Reduzido */
+            margin-top: 12px;
         }
         
         .voltar-home a {
@@ -257,7 +250,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-top: 3px;
         }
         
-        /* Responsivo: 1 coluna em telas pequenas */
         @media (max-width: 600px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -270,7 +262,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
     <div class="cadastro-container">
-        <!-- Logo -->
         <div class="logo-cadastro">
             <h1>Mundo GiCa</h1>
             <p>Crie sua conta e comece a comprar</p>
@@ -279,42 +270,36 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         <h2>Cadastro</h2>
         
         <?php if($erro): ?>
-            <div class="alert alert-erro">❌ <?php echo $erro; ?></div>
+            <div class="alert alert-erro"> <?php echo $erro; ?></div>
         <?php endif; ?>
         
         <?php if($sucesso): ?>
-            <div class="alert alert-sucesso">✅ <?php echo $sucesso; ?></div>
+            <div class="alert alert-sucesso"> <?php echo $sucesso; ?></div>
         <?php endif; ?>
         
         <form method="POST" action="">
-            <!-- GRID 2 COLUNAS -->
             <div class="form-grid">
-                <!-- Nome (2 colunas) -->
                 <div class="form-group full-width">
                     <label for="nome">Nome Completo *</label>
                     <input type="text" id="nome" name="nome" value="<?php echo isset($_POST['nome']) ? htmlspecialchars($_POST['nome']) : ''; ?>" required placeholder="João da Silva">
                 </div>
                 
-                <!-- Email -->
                 <div class="form-group">
                     <label for="email">E-mail *</label>
                     <input type="email" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : $email_preenchido; ?>" required placeholder="seu@email.com">
                 </div>
                 
-                <!-- Telefone -->
                 <div class="form-group">
                     <label for="telefone">Telefone <span class="campo-opcional">(opcional)</span></label>
                     <input type="tel" id="telefone" name="telefone" value="<?php echo isset($_POST['telefone']) ? htmlspecialchars($_POST['telefone']) : ''; ?>" placeholder="(16) 99999-9999">
                 </div>
                 
-                <!-- Senha -->
                 <div class="form-group">
                     <label for="senha">Senha *</label>
                     <input type="password" id="senha" name="senha" required minlength="6" placeholder="Mínimo 6 caracteres">
-                    <div class="requisitos-senha">🔒 Mínimo 6 caracteres</div>
+                    <div class="requisitos-senha">Mínimo 6 caracteres</div>
                 </div>
                 
-                <!-- Confirmar Senha -->
                 <div class="form-group">
                     <label for="confirmar_senha">Confirmar Senha *</label>
                     <input type="password" id="confirmar_senha" name="confirmar_senha" required minlength="6" placeholder="Digite novamente">

@@ -6,7 +6,6 @@ if(!isset($_SESSION['cliente_id'])) {
     exit;
 }
 
-// Verificar se é administrador
 $stmt = $conn->prepare("SELECT admin FROM clientes WHERE id = ?");
 $stmt->bind_param("i", $_SESSION['cliente_id']);
 $stmt->execute();
@@ -26,27 +25,24 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $estoque = intval($_POST['estoque']);
     $imagem = mysqli_real_escape_string($conn, trim($_POST['imagem']));
     
-    // Verificar se é edição ou novo produto
     if(isset($_POST['id']) && !empty($_POST['id'])) {
-        // Editar produto existente
         $id = intval($_POST['id']);
         $sql = "UPDATE produtos SET nome = '$nome', descricao = '$descricao', preco = $preco, 
                 marca = '$marca', estoque = $estoque, imagem = '$imagem' WHERE id = $id";
         
         if(mysqli_query($conn, $sql)) {
-            $_SESSION['sucesso'] = "✅ Produto atualizado com sucesso!";
+            $_SESSION['sucesso'] = "Produto atualizado com sucesso!";
         } else {
-            $_SESSION['erro'] = "❌ Erro ao atualizar produto: " . mysqli_error($conn);
+            $_SESSION['erro'] = "Erro ao atualizar produto: " . mysqli_error($conn);
         }
     } else {
-        // Inserir novo produto
         $sql = "INSERT INTO produtos (nome, descricao, preco, marca, estoque, imagem) 
                 VALUES ('$nome', '$descricao', $preco, '$marca', $estoque, '$imagem')";
         
         if(mysqli_query($conn, $sql)) {
-            $_SESSION['sucesso'] = "✅ Produto cadastrado com sucesso!";
+            $_SESSION['sucesso'] = "Produto cadastrado com sucesso!";
         } else {
-            $_SESSION['erro'] = "❌ Erro ao cadastrar produto: " . mysqli_error($conn);
+            $_SESSION['erro'] = "Erro ao cadastrar produto: " . mysqli_error($conn);
         }
     }
     

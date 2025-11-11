@@ -17,7 +17,6 @@ if(mysqli_num_rows($resultado) == 0) {
 
 $produto = mysqli_fetch_assoc($resultado);
 
-// ARRAY COM OS CAMINHOS DAS IMAGENS FIXAS
 $imagens_produtos = [
     1 => 'img/esmalteamar.png',
     2 => 'img/esmalteescarlate.png',
@@ -36,7 +35,6 @@ $imagens_produtos = [
     15 => 'img/esmaltesanita.png'
 ];
 
-// Usar imagem do array, se não existir usa do banco
 $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$produto_id] : $produto['imagem'];
 ?>
 
@@ -208,6 +206,62 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
             font-size: 1.2rem;
             margin-bottom: 20px;
         }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            border: 3px solid white;
+            transition: transform 0.3s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
+
+        .notificacao-flutuante {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            z-index: 9999;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 4.7s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notificacao-sucesso {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .notificacao-erro {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(500px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
         
         @media (max-width: 768px) {
             .produto-detalhes {
@@ -231,7 +285,6 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
     </style>
 </head>
 <body>
-    <!-- HEADER -->
     <header id="inicio">
         <div class="fixo">
             <div class="header-top">
@@ -245,10 +298,23 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                     <img src="img/lupa.png" alt="Lupa" class="lupa">
                 </div>
                 <div class="cart-container">
-                    <button class="cart-button" onclick="window.location.href='<?php echo isset($_SESSION['cliente_id']) ? 'carrinho.php' : 'login.php'; ?>'">
-                        <img src="img/sacoladecompras.png" alt="Ícone de sacola">
-                        <span>Minha Sacola<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
-                    </button>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <?php if(isset($_SESSION['cliente_id'])): ?>
+                            <button class="cart-button" onclick="window.location.href='carrinho.php'">
+                                <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
+                                <span>Minha Sacola<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
+                            </button>
+                            
+                            <div class="user-avatar" title="<?php echo $_SESSION['cliente_nome']; ?>">
+                                <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
+                            </div>
+                        <?php else: ?>
+                            <button class="cart-button" onclick="window.location.href='login.php'">
+                                <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
+                                <span>Minha Sacola</span>
+                            </button>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
 
@@ -271,13 +337,13 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                             $usuario = mysqli_fetch_assoc($resultado_admin);
                             if($usuario['admin'] == 1):
                         ?>
-                            <li><a href="admin.php" style="background: #10b981; padding: 8px 15px; border-radius: 6px;">⚙️ Admin</a></li>
+                            <li><a href="admin.php" style="background: #10b981; padding: 8px 15px; border-radius: 6px;">Admin</a></li>
                         <?php 
                             endif;
                         }
                         ?>
                         
-                        <li><a href="logout.php">Sair (<?php echo $_SESSION['cliente_nome']; ?>)</a></li>
+                        <li><a href="logout.php">Sair</a></li>
                     <?php else: ?>
                         <li><a href="cadastro.php">Cadastro</a></li>
                         <li><a href="login.php">Login</a></li>
@@ -288,24 +354,33 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
     </header>
     <div class="spacer"></div>
 
-    <!-- MENSAGENS -->
     <?php if(isset($_SESSION['sucesso'])): ?>
-        <div style="background: #d1fae5; color: #065f46; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #a7f3d0;">
-            <?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?>
+        <div class="notificacao-flutuante notificacao-sucesso">
+            <strong><?php echo $_SESSION['sucesso']; ?></strong>
         </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.notificacao-flutuante')?.remove();
+            }, 5000);
+        </script>
+        <?php unset($_SESSION['sucesso']); ?>
     <?php endif; ?>
 
     <?php if(isset($_SESSION['erro'])): ?>
-        <div style="background: #fee2e2; color: #dc2626; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #fecaca;">
-            <?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?>
+        <div class="notificacao-flutuante notificacao-erro">
+            <strong><?php echo $_SESSION['erro']; ?></strong>
         </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.notificacao-flutuante')?.remove();
+            }, 5000);
+        </script>
+        <?php unset($_SESSION['erro']); ?>
     <?php endif; ?>
 
-    <!-- DETALHES DO PRODUTO -->
     <div class="detalhes-container">
         <div class="produto-detalhes">
             <div class="produto-imagem">
-                <!-- USANDO IMAGEM FIXA DO ARRAY -->
                 <img src="<?php echo $imagem_produto; ?>" alt="<?php echo $produto['nome']; ?>">
             </div>
             
@@ -376,7 +451,6 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
         </div>
     </div>
 
-    <!-- FOOTER -->
     <footer>
         <div class="footer-content">
             <div class="footer-info">

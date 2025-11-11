@@ -4,9 +4,11 @@ include 'conexao.php';
 // PEGAR FILTRO DE MARCA DA URL
 $marca_filtro = isset($_GET['marca']) ? $_GET['marca'] : 'todas';
 
-// BUSCAR PRODUTOS DO BANCO COM FILTRO
+// BUSCAR PRODUTOS (EXCLUINDO COLEÇÕES DE "TODAS")
 if($marca_filtro == 'todas') {
-    $sql = "SELECT * FROM produtos ORDER BY id ASC";
+    $sql = "SELECT * FROM produtos WHERE marca != 'Coleções' ORDER BY id ASC";
+} elseif($marca_filtro == 'Coleções') {
+    $sql = "SELECT * FROM produtos WHERE marca = 'Coleções' ORDER BY id ASC";
 } else {
     $marca_escaped = mysqli_real_escape_string($conn, $marca_filtro);
     $sql = "SELECT * FROM produtos WHERE marca = '$marca_escaped' ORDER BY id ASC";
@@ -46,7 +48,6 @@ $imagens_produtos = [
     <title>E-commerce de Esmaltes - Mundo GiCa</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ESTILOS PARA O FILTRO ATIVO */
         .brand-options a {
             display: inline-block;
             padding: 10px 20px;
@@ -90,12 +91,90 @@ $imagens_produtos = [
             background-color: #fef3c7;
             color: #92400e;
         }
+
+        /* NOTIFICAÇÃO FLUTUANTE */
+        .notificacao-flutuante {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            z-index: 9999;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 4.7s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notificacao-sucesso {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .notificacao-erro {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(500px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        .notificacao-flutuante::before {
+            content: '';
+            font-size: 1.5rem;
+        }
+
+        .notificacao-sucesso::before {
+            content: '✓';
+        }
+
+        .notificacao-erro::before {
+            content: '⚠';
+        }
+
+        /* AVATAR ESTILO */
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            border: 3px solid white;
+            transition: transform 0.3s;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
-  <!-- Grupo - Carla Victória Barros da Silva 09323067
-              - Giovanna Borba Marchetto 09323042 -->
-              
   <header id="inicio">
    <div class="fixo">
     <div class="header-top">
@@ -109,35 +188,23 @@ $imagens_produtos = [
             <img src="img/lupa.png" alt="Lupa" class="lupa">
         </div>
         
-        <!-- AVATAR COM LETRA (OPÇÃO 3) -->
         <div class="cart-container">
             <?php if(isset($_SESSION['cliente_id'])): ?>
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <!-- Carrinho -->
                     <?php $total_itens = isset($_SESSION['carrinho']) ? count($_SESSION['carrinho']) : 0; ?>
-                    <a href="carrinho.php" class="cart-button" style="text-decoration: none; display: flex; align-items: center; gap: 5px;">
-                        <span>Carrinho (<?php echo $total_itens; ?>)</span>
-                    </a>
+                    <button class="cart-button" onclick="window.location.href='carrinho.php'">
+                        <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
+                        <span>Sacola (<?php echo $total_itens; ?>)</span>
+                    </button>
                     
-                    <!-- Card do usuário com Avatar -->
-                    <div style="display: flex; align-items: center; gap: 10px; background: rgba(124, 58, 237, 0.1); padding: 8px 15px; border-radius: 25px; border: 2px solid #7c3aed;">
-                        <!-- Avatar com inicial -->
-                        <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.1rem; flex-shrink: 0;">
-                            <?php 
-                            // PEGAR SÓ A PRIMEIRA LETRA DO PRIMEIRO NOME
-                            $primeiroNome = explode(' ', $_SESSION['cliente_nome'])[0];
-                            echo strtoupper(substr($primeiroNome, 0, 1)); 
-                            ?>
-                        </div>
-                        <!-- Nome (só primeiro nome) -->
-                        <span style="color: #7c3aed; font-weight: 600; white-space: nowrap;">
-                            <?php echo explode(' ', $_SESSION['cliente_nome'])[0]; ?>
-                        </span>
+                    <!-- AVATAR SÓ COM LETRA -->
+                    <div class="user-avatar" title="<?php echo $_SESSION['cliente_nome']; ?>">
+                        <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
                     </div>
                 </div>
             <?php else: ?>
                 <button class="cart-button" onclick="window.location.href='login.php'">
-                    <img src="img/sacoladecompras.png" alt="Ícone de sacola">
+                    <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
                     <span>Minha Sacola</span>
                 </button>
             <?php endif; ?>
@@ -156,7 +223,6 @@ $imagens_produtos = [
                 <li><a href="carrinho.php">Carrinho</a></li>
                 
                 <?php
-                // Verificar se é admin
                 $cliente_id = $_SESSION['cliente_id'];
                 $sql_admin = "SELECT admin FROM clientes WHERE id = $cliente_id";
                 $resultado_admin = mysqli_query($conn, $sql_admin);
@@ -164,7 +230,7 @@ $imagens_produtos = [
                     $usuario = mysqli_fetch_assoc($resultado_admin);
                     if($usuario['admin'] == 1):
                 ?>
-                    <li><a href="admin.php" style="background: #10b981; padding: 8px 15px; border-radius: 6px;">Admin</a></li>
+                    <li><a href="admin.php" style="background: #10b981; padding: 15px 15px; border-radius: 0px;">Admin</a></li>
                 <?php 
                     endif;
                 }
@@ -182,23 +248,41 @@ $imagens_produtos = [
 
 <div class="spacer"></div>
 
-    <!-- MENSAGENS -->
+    <!-- NOTIFICAÇÕES FLUTUANTES -->
     <?php if(isset($_SESSION['sucesso'])): ?>
-        <div style="background: #d1fae5; color: #065f46; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #a7f3d0;">
-             <?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?>
+        <div class="notificacao-flutuante notificacao-sucesso">
+            <strong><?php echo $_SESSION['sucesso']; ?></strong>
         </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.notificacao-flutuante')?.remove();
+            }, 5000);
+        </script>
+        <?php unset($_SESSION['sucesso']); ?>
     <?php endif; ?>
 
     <?php if(isset($_SESSION['erro'])): ?>
-        <div style="background: #fee2e2; color: #dc2626; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #fecaca;">
-             <?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?>
+        <div class="notificacao-flutuante notificacao-erro">
+            <strong><?php echo $_SESSION['erro']; ?></strong>
         </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.notificacao-flutuante')?.remove();
+            }, 5000);
+        </script>
+        <?php unset($_SESSION['erro']); ?>
     <?php endif; ?>
 
     <?php if(isset($_SESSION['pedido_sucesso'])): ?>
-        <div style="background: #d1fae5; color: #065f46; padding: 15px; text-align: center; border-radius: 8px; margin: 20px auto; max-width: 800px; border: 1px solid #a7f3d0;">
-             <?php echo $_SESSION['pedido_sucesso']; unset($_SESSION['pedido_sucesso']); ?>
+        <div class="notificacao-flutuante notificacao-sucesso">
+            <strong><?php echo $_SESSION['pedido_sucesso']; ?></strong>
         </div>
+        <script>
+            setTimeout(() => {
+                document.querySelector('.notificacao-flutuante')?.remove();
+            }, 5000);
+        </script>
+        <?php unset($_SESSION['pedido_sucesso']); ?>
     <?php endif; ?>
 
     <main>
@@ -210,7 +294,6 @@ $imagens_produtos = [
         </div>
     </div>
     
-<!-- FILTRO DE MARCAS COM PHP -->
 <div class="brand-filter">
   <h3>Filtrar por Marca</h3>
   <div class="brand-options">
@@ -219,20 +302,18 @@ $imagens_produtos = [
       <a href="index.php?marca=Colorama#linkprodutos" class="<?php echo $marca_filtro == 'Colorama' ? 'active' : ''; ?>">Colorama</a>
       <a href="index.php?marca=Impala#linkprodutos" class="<?php echo $marca_filtro == 'Impala' ? 'active' : ''; ?>">Impala</a>
       <a href="index.php?marca=Avon#linkprodutos" class="<?php echo $marca_filtro == 'Avon' ? 'active' : ''; ?>">Avon</a>
-      <a href="index.php?marca=Coleções#linkprodutos" class="<?php echo $marca_filtro == 'Coleções' ? 'active' : ''; ?>">Coleções</a>
       <a href="index.php?marca=todas#linkprodutos" class="<?php echo $marca_filtro == 'todas' ? 'active' : ''; ?>">Todas as Marcas</a>
   </div>
 </div>
 
-<!-- MENSAGEM DE RESULTADO DO FILTRO -->
 <?php if($marca_filtro != 'todas'): ?>
     <?php if(count($produtos) > 0): ?>
         <div class="mensagem-filtro mensagem-sucesso">
-             <?php echo count($produtos); ?> produto(s) encontrado(s) para "<?php echo htmlspecialchars($marca_filtro); ?>"
+            ✓ <?php echo count($produtos); ?> produto(s) encontrado(s) para "<?php echo htmlspecialchars($marca_filtro); ?>"
         </div>
     <?php else: ?>
         <div class="mensagem-filtro mensagem-vazio">
-             Nenhum produto encontrado para "<?php echo htmlspecialchars($marca_filtro); ?>"
+            Nenhum produto encontrado para "<?php echo htmlspecialchars($marca_filtro); ?>"
         </div>
     <?php endif; ?>
 <?php endif; ?>
@@ -242,12 +323,11 @@ $imagens_produtos = [
         
         <?php if(count($produtos) == 0): ?>
             <div style="text-align: center; padding: 40px; width: 100%;">
-                <h3 style="color: #64748b;">Nenhum produto disponível nesta marca </h3>
+                <h3 style="color: #64748b;">Nenhum produto disponível nesta marca</h3>
                 <p><a href="index.php?marca=todas#linkprodutos" style="color: #7c3aed; font-weight: 600;">← Ver todos os produtos</a></p>
             </div>
         <?php else: ?>
             <?php foreach($produtos as $produto): 
-                // Usar imagem fixa do array
                 $imagem = isset($imagens_produtos[$produto['id']]) ? $imagens_produtos[$produto['id']] : $produto['imagem'];
             ?>
             <div class="produto">

@@ -15,7 +15,7 @@ if(empty($_SESSION['carrinho'])) {
     exit;
 }
 
-// ARRAY COM IMAGENS FIXAS (para exibir corretamente)
+// ARRAY COM IMAGENS FIXAS
 $imagens_produtos = [
     1 => 'img/esmalteamar.png',
     2 => 'img/esmalteescarlate.png',
@@ -41,11 +41,9 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $forma_pagamento = mysqli_real_escape_string($conn, trim($_POST['forma_pagamento']));
     $observacoes = isset($_POST['observacoes']) ? mysqli_real_escape_string($conn, trim($_POST['observacoes'])) : '';
     
-    // Validações
     if(empty($endereco) || empty($cep) || empty($forma_pagamento)) {
         $_SESSION['erro'] = "Preencha todos os campos obrigatórios!";
     } else {
-        // Calcular total
         $total = 0;
         foreach($_SESSION['carrinho'] as $item) {
             $total += $item['preco'] * $item['quantidade'];
@@ -53,33 +51,26 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         $cliente_id = $_SESSION['cliente_id'];
         
-        // USAR CONSULTA TRADICIONAL (mais compatível)
         $sql = "INSERT INTO pedidos (cliente_id, total, status, endereco, cep, forma_pagamento, observacoes) 
                 VALUES ($cliente_id, $total, 'pendente', '$endereco', '$cep', '$forma_pagamento', '$observacoes')";
         
         if(mysqli_query($conn, $sql)) {
             $pedido_id = mysqli_insert_id($conn);
             
-            // Inserir itens do pedido e atualizar estoque
             foreach($_SESSION['carrinho'] as $item) {
                 $produto_id = intval($item['produto_id']);
                 $quantidade = intval($item['quantidade']);
                 $preco = floatval($item['preco']);
                 
-                // Inserir item do pedido
                 $sql_item = "INSERT INTO pedido_itens (pedido_id, produto_id, quantidade, preco) 
                              VALUES ($pedido_id, $produto_id, $quantidade, $preco)";
                 mysqli_query($conn, $sql_item);
                 
-                // Atualizar estoque
                 $sql_estoque = "UPDATE produtos SET estoque = estoque - $quantidade WHERE id = $produto_id";
                 mysqli_query($conn, $sql_estoque);
             }
             
-            // Limpar carrinho
             unset($_SESSION['carrinho']);
-            
-            // Redirecionar para página de confirmação
             header('Location: pedido_confirmado.php?pedido_id=' . $pedido_id);
             exit;
         } else {
@@ -88,7 +79,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Calcular total para exibição
 $total = 0;
 foreach($_SESSION['carrinho'] as $item) {
     $total += $item['preco'] * $item['quantidade'];
@@ -236,7 +226,6 @@ foreach($_SESSION['carrinho'] as $item) {
     </style>
 </head>
 <body>
-    <!-- HEADER -->
     <header id="inicio">
         <div class="fixo">
             <div class="header-top">
@@ -250,13 +239,15 @@ foreach($_SESSION['carrinho'] as $item) {
                     <img src="img/lupa.png" alt="Lupa" class="lupa">
                 </div>
                 <div class="cart-container">
-                    <div style="text-align: center;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
                         <button class="cart-button" onclick="window.location.href='carrinho.php'">
-                            <img src="img/sacoladecompras.png" alt="Ícone de sacola">
+                            <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
                             <span>Minha Sacola (<?php echo count($_SESSION['carrinho']); ?>)</span>
                         </button>
-                        <div style="font-size: 0.85rem; color: #7c3aed; font-weight: 600; margin-top: 5px;">
-                            Olá, <?php echo explode(' ', $_SESSION['cliente_nome'])[0]; ?>! 👋
+                        
+                        <!-- AVATAR SÓ COM LETRA E DEGRADÊ -->
+                        <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.3rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; border: 3px solid white;" title="<?php echo $_SESSION['cliente_nome']; ?>">
+                            <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
                         </div>
                     </div>
                 </div>
@@ -285,9 +276,8 @@ foreach($_SESSION['carrinho'] as $item) {
         <?php endif; ?>
         
         <div class="resumo-pedido">
-            <h2>📋 Resumo do Pedido</h2>
+            <h2>Resumo do Pedido</h2>
             <?php foreach($_SESSION['carrinho'] as $item): 
-                // USAR IMAGEM FIXA DO ARRAY
                 $imagem = isset($imagens_produtos[$item['produto_id']]) ? $imagens_produtos[$item['produto_id']] : $item['imagem'];
             ?>
                 <div class="resumo-item">
@@ -307,12 +297,12 @@ foreach($_SESSION['carrinho'] as $item) {
             <?php endforeach; ?>
             
             <div class="total-pedido">
-                💰 Total: R$ <?php echo number_format($total, 2, ',', '.'); ?>
+                Total: R$ <?php echo number_format($total, 2, ',', '.'); ?>
             </div>
         </div>
         
         <form method="POST" action="" class="form-finalizar">
-            <h2>📍 Informações de Entrega</h2>
+            <h2>Informações de Entrega</h2>
             
             <div class="form-group">
                 <label for="endereco">Endereço Completo *</label>
@@ -328,9 +318,9 @@ foreach($_SESSION['carrinho'] as $item) {
                 <label for="forma_pagamento">Forma de Pagamento *</label>
                 <select id="forma_pagamento" name="forma_pagamento" required>
                     <option value="">Selecione...</option>
-                    <option value="cartao">💳 Cartão de Crédito</option>
-                    <option value="boleto">📄 Boleto Bancário</option>
-                    <option value="pix">📱 PIX</option>
+                    <option value="cartao">Cartão de Crédito</option>
+                    <option value="boleto">Boleto Bancário</option>
+                    <option value="pix">PIX</option>
                 </select>
             </div>
             
@@ -339,7 +329,7 @@ foreach($_SESSION['carrinho'] as $item) {
                 <textarea id="observacoes" name="observacoes" rows="2" placeholder="Alguma observação sobre o pedido..."></textarea>
             </div>
             
-            <button type="submit" class="btn-finalizar">✅ Confirmar Pedido</button>
+            <button type="submit" class="btn-finalizar">Confirmar Pedido</button>
         </form>
     </div>
 </body>

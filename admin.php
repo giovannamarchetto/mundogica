@@ -1,7 +1,6 @@
 <?php
 include 'conexao.php';
 
-// Verificar se é administrador
 if(!isset($_SESSION['cliente_id'])) {
     header('Location: login.php');
     exit;
@@ -38,7 +37,6 @@ $imagens_produtos = [
     15 => 'img/esmaltesanita.png'
 ];
 
-// Processar edição de produto
 $produto_editar = null;
 if(isset($_GET['editar'])) {
     $produto_id = intval($_GET['editar']);
@@ -49,7 +47,6 @@ if(isset($_GET['editar'])) {
     $produto_editar = $result->fetch_assoc();
 }
 
-// Buscar produtos
 $produtos = [];
 $sql = "SELECT * FROM produtos ORDER BY id DESC";
 $resultado = mysqli_query($conn, $sql);
@@ -57,7 +54,6 @@ while($row = mysqli_fetch_assoc($resultado)) {
     $produtos[] = $row;
 }
 
-// Buscar pedidos
 $pedidos = [];
 $sql = "SELECT p.*, c.nome as cliente_nome FROM pedidos p 
         JOIN clientes c ON p.cliente_id = c.id 
@@ -237,7 +233,6 @@ while($row = mysqli_fetch_assoc($resultado)) {
     </style>
 </head>
 <body>
-    <!-- HEADER -->
     <header id="inicio">
         <div class="fixo">
             <div class="header-top">
@@ -253,7 +248,7 @@ while($row = mysqli_fetch_assoc($resultado)) {
                 <div class="cart-container">
                     <button class="cart-button" onclick="window.location.href='carrinho.php'">
                         <img src="img/sacoladecompras.png" alt="Ícone de sacola">
-                        <span>Minha Sacola<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
+                        <span>Sacola<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
                     </button>
                 </div>
             </div>
@@ -266,7 +261,7 @@ while($row = mysqli_fetch_assoc($resultado)) {
                     <li><a href="index.php#linkprodutos">Produtos</a></li>
                     <li><a href="index.php#promocoes">Promoções</a></li>
                     <li><a href="carrinho.php">Carrinho</a></li>
-                    <li><a href="admin.php" style="background: #10b981; padding: 8px 15px; border-radius: 6px;">⚙️ Admin</a></li>
+                    <li><a href="admin.php" style="background: #10b981; padding: 15px 15px; border-radius: 0px;">Admin</a></li>
                     <li><a href="logout.php">Sair (<?php echo $_SESSION['cliente_nome']; ?>)</a></li>
                 </ul>
             </nav>
@@ -275,7 +270,7 @@ while($row = mysqli_fetch_assoc($resultado)) {
     <div class="spacer"></div>
     
     <div class="admin-container">
-        <h1>🛠 Painel Administrativo</h1>
+        <h1>Painel Administrativo</h1>
         
         <?php if(isset($_SESSION['sucesso'])): ?>
             <div class="alert alert-success"><?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?></div>
@@ -286,14 +281,13 @@ while($row = mysqli_fetch_assoc($resultado)) {
         <?php endif; ?>
         
         <div class="admin-tabs">
-            <button class="admin-tab active" onclick="openTab('produtos')">📦 Produtos</button>
-            <button class="admin-tab" onclick="openTab('pedidos')">📋 Pedidos</button>
-            <button class="admin-tab" onclick="openTab('adicionar')">➕ <?php echo isset($produto_editar) ? 'Editar Produto' : 'Adicionar Produto'; ?></button>
+            <button class="admin-tab active" onclick="openTab('produtos')">Produtos</button>
+            <button class="admin-tab" onclick="openTab('pedidos')">Pedidos</button>
+            <button class="admin-tab" onclick="openTab('adicionar')"><?php echo isset($produto_editar) ? 'Editar Produto' : 'Adicionar Produto'; ?></button>
         </div>
         
-        <!-- Tab Produtos -->
         <div id="produtos" class="tab-content active">
-            <button class="btn-admin btn-add" onclick="openTab('adicionar')">+ Adicionar Novo Produto</button>
+            <button class="btn-admin btn-add" onclick="openTab('adicionar')">Adicionar Novo Produto</button>
             
             <div class="admin-table">
                 <table>
@@ -310,7 +304,6 @@ while($row = mysqli_fetch_assoc($resultado)) {
                     </thead>
                     <tbody>
                         <?php foreach($produtos as $produto): 
-                            // Usar imagem fixa do array
                             $imagem = isset($imagens_produtos[$produto['id']]) ? $imagens_produtos[$produto['id']] : $produto['imagem'];
                         ?>
                         <tr>
@@ -333,7 +326,6 @@ while($row = mysqli_fetch_assoc($resultado)) {
             </div>
         </div>
         
-        <!-- Tab Pedidos -->
         <div id="pedidos" class="tab-content">
             <div class="admin-table">
                 <table>
@@ -374,7 +366,6 @@ while($row = mysqli_fetch_assoc($resultado)) {
             </div>
         </div>
         
-        <!-- Tab Adicionar/Editar Produto -->
         <div id="adicionar" class="tab-content">
             <h2><?php echo isset($produto_editar) ? 'Editar Produto' : 'Adicionar Novo Produto'; ?></h2>
             <form method="POST" action="admin_salvar_produto.php" class="form-admin">
@@ -419,17 +410,14 @@ while($row = mysqli_fetch_assoc($resultado)) {
 
     <script>
         function openTab(tabName) {
-            // Esconder todas as tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Remover active de todos os botões
             document.querySelectorAll('.admin-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Mostrar tab selecionada
             document.getElementById(tabName).classList.add('active');
             event.currentTarget.classList.add('active');
         }
@@ -440,7 +428,6 @@ while($row = mysqli_fetch_assoc($resultado)) {
             }
         }
         
-        // Abrir tab de edição se estiver editando
         <?php if(isset($produto_editar)): ?>
             window.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('adicionar').classList.add('active');

@@ -1,7 +1,6 @@
 <?php
 include 'conexao.php';
 
-// Verificar se tem o número do pedido
 if(!isset($_GET['pedido_id'])) {
     header('Location: index.php');
     exit;
@@ -9,7 +8,6 @@ if(!isset($_GET['pedido_id'])) {
 
 $pedido_id = $_GET['pedido_id'];
 
-// Buscar dados do pedido
 $sql = "SELECT p.*, c.nome as cliente_nome, c.email 
         FROM pedidos p 
         JOIN clientes c ON p.cliente_id = c.id 
@@ -193,17 +191,17 @@ $pedido = mysqli_fetch_assoc($resultado);
         
         <div class="detalhes-pedido">
             <div class="detalhe-item">
-                <span class="detalhe-label">📧 Email:</span>
+                <span class="detalhe-label">Email:</span>
                 <span class="detalhe-valor"><?php echo $pedido['email']; ?></span>
             </div>
             
             <div class="detalhe-item">
-                <span class="detalhe-label">📅 Data:</span>
+                <span class="detalhe-label">Data:</span>
                 <span class="detalhe-valor"><?php echo date('d/m/Y H:i', strtotime($pedido['data_pedido'])); ?></span>
             </div>
             
             <div class="detalhe-item">
-                <span class="detalhe-label">💳 Pagamento:</span>
+                <span class="detalhe-label">Pagamento:</span>
                 <span class="detalhe-valor">
                     <?php 
                     switch($pedido['forma_pagamento']) {
@@ -217,7 +215,7 @@ $pedido = mysqli_fetch_assoc($resultado);
             </div>
             
             <div class="detalhe-item">
-                <span class="detalhe-label total">💰 Total:</span>
+                <span class="detalhe-label total">Total:</span>
                 <span class="detalhe-valor total">R$ <?php echo number_format($pedido['total'], 2, ',', '.'); ?></span>
             </div>
         </div>

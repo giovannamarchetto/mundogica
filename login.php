@@ -1,7 +1,6 @@
 <?php
 include 'conexao.php';
 
-// Se já está logado, redirecionar para index
 if(isset($_SESSION['cliente_id'])) {
     header('Location: index.php');
     exit;
@@ -9,7 +8,6 @@ if(isset($_SESSION['cliente_id'])) {
 
 $erro = '';
 
-// Verificar se o formulário foi enviado
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $senha = $_POST['senha'];
@@ -48,7 +46,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Login - Mundo GiCa</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* RESET PARA PÁGINA CLEAN */
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -59,7 +56,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0;
         }
         
-        /* Esconder header e footer se existirem */
         header, footer, .spacer {
             display: none !important;
         }
@@ -211,7 +207,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
     <div class="login-container">
-        <!-- Logo -->
         <div class="logo-login">
             <h1>Mundo GiCa</h1>
             <p>Faça login para continuar</p>
@@ -220,7 +215,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         <h2>Login</h2>
         
         <?php if($erro): ?>
-            <div class="alert">❌ <?php echo $erro; ?></div>
+            <div class="alert"><?php echo $erro; ?></div>
         <?php endif; ?>
         
         <form method="POST" action="">
