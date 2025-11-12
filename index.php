@@ -1,16 +1,12 @@
 <?php
 include 'conexao.php';
 
-// PEGAR FILTRO DE MARCA DA URL
 $marca_filtro = isset($_GET['marca']) ? $_GET['marca'] : 'todas';
 
-// PEGAR TERMO DE BUSCA
 $busca = isset($_GET['busca']) ? trim($_GET['busca']) : '';
 
-// CONSTRUIR QUERY COM FILTROS
 $where_conditions = [];
 
-// Filtro de marca (excluindo coleções de "todas")
 if($marca_filtro == 'todas') {
     $where_conditions[] = "marca != 'Coleções'";
 } elseif($marca_filtro == 'Coleções') {
@@ -20,13 +16,11 @@ if($marca_filtro == 'todas') {
     $where_conditions[] = "marca = '$marca_escaped'";
 }
 
-// Filtro de busca
 if(!empty($busca)) {
     $busca_escaped = mysqli_real_escape_string($conn, $busca);
     $where_conditions[] = "(nome LIKE '%$busca_escaped%' OR descricao LIKE '%$busca_escaped%' OR marca LIKE '%$busca_escaped%')";
 }
 
-// Montar SQL
 $sql = "SELECT * FROM produtos";
 if(count($where_conditions) > 0) {
     $sql .= " WHERE " . implode(" AND ", $where_conditions);
@@ -39,7 +33,7 @@ while($produto = mysqli_fetch_assoc($resultado)) {
     $produtos[] = $produto;
 }
 
-// ARRAY COM IMAGENS FIXAS
+// ARRAY COM IMAGENS FIXAS PQ NAO TAVAM APARECENDO
 $imagens_produtos = [
     1 => 'img/esmalteamar.png',
     2 => 'img/esmalteescarlate.png',
@@ -325,14 +319,17 @@ $imagens_produtos = [
         <?php unset($_SESSION['pedido_sucesso']); ?>
     <?php endif; ?>
 
-    <main>
-      <div class="banner">
+<main>
+    <div class="banner">
+        <img src="img/banner2.jpeg" alt="Banner de esmaltes" class="banner-img">
+        <div class="banner-overlay"></div>
         <div class="banner-content">
             <h1>Descubra Cores Incríveis!</h1>
             <p>Dê vida às suas unhas com as últimas tendências em esmaltes. Aproveite descontos de até <strong>20%</strong> nas coleções da estação!</p>
             <a href="#linkprodutos" class="banner-button">Confira Agora</a>
         </div>
     </div>
+</main>
     
 <div class="brand-filter">
   <h3>Filtrar por Marca</h3>
