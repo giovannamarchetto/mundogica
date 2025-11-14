@@ -69,7 +69,7 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
         
         .produto-imagem img {
             width: 100%;
-            max-width: 500px;
+            max-width: 800px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
@@ -418,7 +418,7 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                 </div>
                 
                 <div class="produto-descricao">
-                    <strong>Descrição:</strong><br><br>
+                    <strong>Descrição:</strong><br>
                     <?php echo nl2br($produto['descricao']); ?>
                 </div>
                 

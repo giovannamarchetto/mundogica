@@ -97,3 +97,34 @@ ADD COLUMN forma_pagamento VARCHAR(50) AFTER cep;
 ALTER TABLE pedidos 
 ADD COLUMN observacoes TEXT AFTER forma_pagamento;
 SELECT * FROM pedidos;
+
+
+UPDATE produtos SET descricao = 'Esmalte cremoso azul-petróleo sofisticado. Alta cobertura e brilho intenso. Secagem rápida em 5 minutos. Durabilidade de até 7 dias. Livre de componentes tóxicos. 8ml.' WHERE id = 1;
+
+UPDATE produtos SET descricao = 'Vermelho escarlate clássico e vibrante. Acabamento cremoso de alta pigmentação. Cobertura uniforme desde a primeira camada. Fórmula hipoalergênica. 8ml.' WHERE id = 2;
+
+UPDATE produtos SET descricao = 'Esmalte metálico rosado com brilho intenso. Efeito topping deslumbrante ideal para festas. Fórmula com micro-glitters. Durabilidade de até 10 dias. 8ml.' WHERE id = 3;
+
+UPDATE produtos SET descricao = 'Top coat com glitter holográfico. Efeito de noites iluminadas sobre qualquer esmalte. Partículas iridescentes que mudam de cor. Secagem ultra-rápida. 9.5ml.' WHERE id = 4;
+
+UPDATE produtos SET descricao = 'Azul vibrante inspirado no amuleto grego. Não mancha as cutículas. Fórmula vegana com acabamento cremoso de longa duração. Livre de crueldade animal. 8ml.' WHERE id = 5;
+
+UPDATE produtos SET descricao = 'Esmalte azul cintilante com fragrância exclusiva de Fini. Aroma suave que permanece após aplicação. Acabamento cremoso com micro-glitters. 8ml.' WHERE id = 6;
+
+UPDATE produtos SET descricao = 'Verde musgo profundo e ousado. Acabamento cremoso opaco de alta qualidade. Cobertura total em 2 camadas. Resistente ao amarelamento. 7.5ml.' WHERE id = 7;
+
+UPDATE produtos SET descricao = 'Vinho perolado com reflexos cintilantes. Acabamento sofisticado para eventos formais e casual chic. Alta fixação e brilho duradouro. 7.5ml.' WHERE id = 8;
+
+UPDATE produtos SET descricao = 'Nude perolado delicado com reflexos rosados. Perfeito para o dia a dia ou como base para nail art. Textura cremosa e cobertura uniforme. 7.5ml.' WHERE id = 9;
+
+UPDATE produtos SET descricao = 'Lilás suave inspirado na cultura sertaneja. Acabamento cremoso acetinado. Alta cobertura sem marcas de pinceladas. Edição limitada Ana Castela. 7.5ml.' WHERE id = 10;
+
+UPDATE produtos SET descricao = 'Vermelho clássico Power Stay com efeito gel. Durabilidade de até 8 dias sem cabine UV. Acabamento ultra-brilhante. Secagem rápida em 3 minutos. 9g.' WHERE id = 11;
+
+UPDATE produtos SET descricao = 'Azul turquesa vibrante com tecnologia Power Stay. Efeito gel profissional em casa. Resistente a água e produtos de limpeza. Brilho duradouro. 9g.' WHERE id = 12;
+
+UPDATE produtos SET descricao = 'Kit com 6 esmaltes Coleção Estrelas by Ana Hickmann. Tons nude, rosa, roxo e vermelho. Sistema de 3 passos. Fórmula livre de 9 componentes tóxicos.' WHERE id = 13;
+
+UPDATE produtos SET descricao = 'Coleção com 6 esmaltes glitter Hits Diamante. Tons laranja, verde, rosa, vermelho, azul e prata. Brilho intenso multidimensional. Alta pigmentação.' WHERE id = 14;
+
+UPDATE produtos SET descricao = 'Kit Capadócia com 6 esmaltes by Anita. Tons terrosos: caramelo, cinza, vinho, bege e coral. Acabamento cremoso fosco. Fórmula vegana livre de crueldade.' WHERE id = 15;

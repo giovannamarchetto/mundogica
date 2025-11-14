@@ -321,7 +321,7 @@ $imagens_produtos = [
 
 <main>
     <div class="banner">
-        <img src="img/banner2.jpeg" alt="Banner de esmaltes" class="banner-img">
+        <img src="img/banner3.png" alt="Banner de esmaltes" class="banner-img">
         <div class="banner-overlay"></div>
         <div class="banner-content">
             <h1>Descubra Cores Incríveis!</h1>
