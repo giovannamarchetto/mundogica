@@ -305,13 +305,13 @@ $imagem_produto = isset($imagens_produtos[$produto_id]) ? $imagens_produtos[$pro
                                 <span>Carrinho<?php if(isset($_SESSION['carrinho'])) echo ' (' . count($_SESSION['carrinho']) . ')'; ?></span>
                             </button>
                             
-                            <div class="user-avatar" title="<?php echo $_SESSION['cliente_nome']; ?>">
-                                <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
-                            </div>
+                            <div class="user-avatar" onclick="window.location.href='perfil.php'" style="cursor: pointer;" title="Meu Perfil">
+    <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
+</div>
                         <?php else: ?>
                             <button class="cart-button" onclick="window.location.href='login.php'">
                                 <img src="img/sacoladecompras.png" alt="Ícone de sacola" style="width: 20px; height: 20px; margin-right: 8px;">
-                                <span>Meu Carrinho</span>
+                                <span>Carrinho</span>
                             </button>
                         <?php endif; ?>
                     </div>

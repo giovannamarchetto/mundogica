@@ -127,4 +127,4 @@ UPDATE produtos SET descricao = 'Kit com 6 esmaltes Coleção Estrelas by Ana Hi
 
 UPDATE produtos SET descricao = 'Coleção com 6 esmaltes glitter Hits Diamante. Tons laranja, verde, rosa, vermelho, azul e prata. Brilho intenso multidimensional. Alta pigmentação.' WHERE id = 14;
 
-UPDATE produtos SET descricao = 'Kit Capadócia com 6 esmaltes by Anita. Tons terrosos: caramelo, cinza, vinho, bege e coral. Acabamento cremoso fosco. Fórmula vegana livre de crueldade.' WHERE id = 15;
+UPDATE produtos SET descricao = 'Kit Capadócia com 6 esmaltes by Anita. Tons terrosos: caramelo, cinza, vinho, bege e coral. Acabamento cremoso fosco. Fórmula vegana.' WHERE id = 15;

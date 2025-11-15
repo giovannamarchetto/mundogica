@@ -34,7 +34,6 @@ $imagens_produtos = [
     15 => 'img/esmaltesanita.png'
 ];
 
-// Processar finalização do pedido
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $endereco = mysqli_real_escape_string($conn, trim($_POST['endereco']));
     $cep = mysqli_real_escape_string($conn, trim($_POST['cep']));
@@ -246,9 +245,9 @@ foreach($_SESSION['carrinho'] as $item) {
                         </button>
                         
                         <!-- AVATAR SÓ COM LETRA E DEGRADÊ -->
-                        <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.3rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: pointer; border: 3px solid white;" title="<?php echo $_SESSION['cliente_nome']; ?>">
-                            <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
-                        </div>
+                        <div class="user-avatar" onclick="window.location.href='perfil.php'" style="cursor: pointer;" title="Meu Perfil">
+    <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
+</div>
                     </div>
                 </div>
             </div>

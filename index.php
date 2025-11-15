@@ -233,9 +233,9 @@ $imagens_produtos = [
                         <span>Carrinho (<?php echo $total_itens; ?>)</span>
                     </button>
                     
-                    <div class="user-avatar" title="<?php echo $_SESSION['cliente_nome']; ?>">
-                        <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
-                    </div>
+                    <div class="user-avatar" onclick="window.location.href='perfil.php'" style="cursor: pointer;" title="Meu Perfil">
+    <?php echo strtoupper(substr(explode(' ', $_SESSION['cliente_nome'])[0], 0, 1)); ?>
+</div>
                 </div>
             <?php else: ?>
                 <button class="cart-button" onclick="window.location.href='login.php'">
@@ -281,6 +281,7 @@ $imagens_produtos = [
   </div>
 </header>
 
+<!-- Notificação Flutuante -->
 <div class="spacer"></div>
 
     <?php if(isset($_SESSION['sucesso'])): ?>
@@ -345,7 +346,7 @@ $imagens_produtos = [
 
 <?php if(!empty($busca)): ?>
     <div class="mensagem-filtro mensagem-sucesso">
-        🔍 Buscando por: "<strong><?php echo htmlspecialchars($busca); ?></strong>" 
+        Buscando por: "<strong><?php echo htmlspecialchars($busca); ?></strong>" 
         <?php if($marca_filtro != 'todas'): ?>
             em "<?php echo htmlspecialchars($marca_filtro); ?>"
         <?php endif; ?>
