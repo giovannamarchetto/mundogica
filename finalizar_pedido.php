@@ -1,14 +1,12 @@
 <?php
 include 'conexao.php';
 
-// Redirecionar se não estiver logado
 if(!isset($_SESSION['cliente_id'])) {
     $_SESSION['erro'] = "Você precisa fazer login para finalizar o pedido!";
     header('Location: login.php');
     exit;
 }
 
-// Redirecionar se carrinho estiver vazio
 if(empty($_SESSION['carrinho'])) {
     $_SESSION['erro'] = "Seu carrinho está vazio!";
     header('Location: carrinho.php');

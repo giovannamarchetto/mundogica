@@ -1,0 +1,21 @@
+/* 
+oie Ju, tudo bem?
+Esse é o trabalho de E-Commerce da Giovanna e da Carla.
+
+Deixando esse arquivinho de texto para você ler antes de executar, eu espero.
+
+Utilizei a base do último trabalho do e-commerce que fizémos um tempo atrás, mas com algumas alterações visuais e,
+principalmente na estrutura de linguagens.
+
+Tiveram algumas coisas que eu quis complementar e deixar tudo bonitinho e funcional, mas que não sabia como fazer.
+Para te deixar ciente disso, utilizei o Claude de suporte e deixei as coisas que peguei dele com os comentarios da 
+própria IA, então as notificações flutuantes, barra de progresso, o icon do perfil e alguns outros. 
+E algumas dificuldades com as imagens aparecendo, então deixei elas fixas em alguns momentos.
+
+Obrigada por esses 3 anos de curso e por toda a paciência e dedicação em nos ensinar.
+Apesar da matéria ser complicada e desafiadora, eu realmente gostei muito de aprender com você.
+Espero que goste do trabalho final!
+
+Bom fim de ano e boas festas!
+Giovanna Borba Marchetto e Carla Victória Barros da Silva
+*/
